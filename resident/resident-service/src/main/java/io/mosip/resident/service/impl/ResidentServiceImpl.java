@@ -444,6 +444,45 @@ public class ResidentServiceImpl implements ResidentService {
 	}
 
 	@Override
+	public ResponseDTO reqAauthTypeOtpStatusUpdate(AuthLockOrUnLockRequestDto dto, AuthTypeStatus authTypeStatus) throws ResidentServiceCheckedException {
+		logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::reqAauthTypeOtpStatusUpdate():: entry");
+		ResponseDTO response = new ResponseDTO();
+		boolean isTransactionSuccessful = false;
+
+		try {
+			audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.VALIDATE_OTP,
+					dto.getTransactionID(), "Request for auth " + authTypeStatus.toString().toLowerCase()));
+			if (dto.getOtp() != null) {
+				boolean isOtpValidated = idAuthService.validateOtp(dto.getTransactionID(), dto.getIndividualId(), dto.getOtp());
+				if (isOtpValidated) {
+					audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.VALIDATE_OTP_SUCCESS,
+							dto.getTransactionID(), "Request for auth " + authTypeStatus.toString().toLowerCase()));
+					Long unlockForSeconds = null;
+					if (authTypeStatus.equals(AuthTypeStatus.UNLOCK	)) {
+						AuthUnLockRequestDTO authUnLockRequestDTO = (AuthUnLockRequestDTO) dto;
+						unlockForSeconds = Long.parseLong(authUnLockRequestDTO.getUnlockForSeconds());
+					}
+					boolean isAuthTypeStatusUpdated = authTypeOtpStatusUpdate(dto.getIndividualId(), dto.getAuthType(),
+							authTypeStatus, unlockForSeconds);
+				}
+			}
+		} catch (OtpValidationFailedException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public boolean authTypeOtpStatusUpdate(String individualId, List<String> authType,
+										io.mosip.resident.constant.AuthTypeStatus authTypeStatusConstant, Long unlockForSeconds) {
+		logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::authTypeStatusUpdate():: entry");
+		boolean isAuthTypeStatusUpdated = false;
+		return isAuthTypeStatusUpdated;
+	}
+
+	@Override
 	public AuthHistoryResponseDTO reqAuthHistory(AuthHistoryRequestDTO dto) throws ResidentServiceCheckedException {
 		logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
 				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::reqAuthHistory():: entry");

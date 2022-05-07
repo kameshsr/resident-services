@@ -142,6 +142,27 @@ public class ResidentController {
 	}
 
 	@ResponseFilter
+	@PostMapping(value = "/req/auth-otp-lock")
+	@Operation(summary = "reqAauthOtpLock", description = "reqAauthOtpLock", tags = { "resident-controller" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "OK"),
+			@ApiResponse(responseCode = "201", description = "Created" ,content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "401", description = "Unauthorized" ,content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "403", description = "Forbidden" ,content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "404", description = "Not Found" ,content = @Content(schema = @Schema(hidden = true)))})
+	public ResponseWrapper<ResponseDTO> reqAauthOtpLock(
+			@Valid @RequestBody RequestWrapper<AuthLockOrUnLockRequestDto> requestDTO)
+			throws ResidentServiceCheckedException {
+		audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.VALIDATE_REQUEST,"request auth otp lock API"));
+		validator.validateAuthLockOrUnlockRequest(requestDTO, AuthTypeStatus.LOCK);
+		audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.REQ_AUTH_LOCK,requestDTO.getRequest().getTransactionID()));
+		ResponseWrapper<ResponseDTO> response = new ResponseWrapper<>();
+		response.setResponse(residentService.reqAauthTypeOtpStatusUpdate(requestDTO.getRequest(), AuthTypeStatus.LOCK));
+		audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.REQ_AUTH_LOCK_SUCCESS,requestDTO.getRequest().getTransactionID()));
+		return response;
+	}
+
+	@ResponseFilter
 	@PostMapping(value = "/req/auth-unlock")
 	@Operation(summary = "reqAuthUnlock", description = "reqAuthUnlock", tags = { "resident-controller" })
 	@ApiResponses(value = {
