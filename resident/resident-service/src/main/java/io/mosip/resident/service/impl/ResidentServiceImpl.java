@@ -50,6 +50,7 @@ public class ResidentServiceImpl implements ResidentService {
 	private static final String DOCUMENT = "documents";
 	private static final String SERVER_PROFILE_SIGN_KEY = "PROD";
 	private static final String UIN = "uin";
+	private static final String UNLOCK_EXP_TIMESTAMP = "unlockExpiryTimestamp";
 
 	private static final Logger logger = LoggerConfiguration.logConfig(ResidentServiceImpl.class);
 
@@ -94,6 +95,12 @@ public class ResidentServiceImpl implements ResidentService {
 
 	@Value("${resident.update-uin.machine-zone-code}")
 	private String zoneCode;
+
+    @Value("${auth.type.status.id}")
+    private String authTypeStatusId;
+
+    @Value("${auth.internal.version}")
+    private String internalAuthVersion;
 
 	@Autowired
 	private AuditUtil audit;
@@ -479,7 +486,83 @@ public class ResidentServiceImpl implements ResidentService {
 		logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
 				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::authTypeStatusUpdate():: entry");
 		boolean isAuthTypeStatusUpdated = false;
+
+		AuthTypeStatusRequestDto authTypeStatusRequestDto = new AuthTypeStatusRequestDto();
+		authTypeStatusRequestDto.setIndividualId(individualId);
+		authTypeStatusRequestDto.setConsentObtained(true);
+		authTypeStatusRequestDto.setId(authTypeStatusId);
+		authTypeStatusRequestDto.setVersion(internalAuthVersion);
+		authTypeStatusRequestDto.setRequestTime(DateUtils.formatToISOString(DateUtils.getUTCCurrentDateTime()));
+
+		List<io.mosip.resident.dto.AuthTypeStatus> authTypes = new ArrayList<>();
+		for (String type : authType) {
+		    String[] types = type.split("-");
+            io.mosip.resident.dto.AuthTypeStatus authTypeStatus = new io.mosip.resident.dto.AuthTypeStatus();
+            String requestId = UUID.randomUUID().toString();
+            authTypeStatus.setRequestId(requestId);
+            if(types.length == 1) {
+                authTypeStatus.setAuthType(types[0]);
+            } else {
+                authTypeStatus.setAuthType(types[0]);
+                authTypeStatus.setAuthSubType(types[1]);
+            }
+            if(authTypeStatusConstant.equals(AuthTypeStatus.LOCK)) {
+                authTypeStatus.setLocked(true);
+                authTypeStatus.setUnlockForSeconds(null);
+            } else {
+                if(unlockForSeconds != null) {
+                    authTypeStatus.setUnlockForSeconds(unlockForSeconds);
+                }
+                authTypeStatus.setLocked(false);
+            }
+            authTypes.add(authTypeStatus);
+		}
+		authTypeStatusRequestDto.setRequest(authTypes);
+		AuthTypeStatusResponseDto response;
+		try {
+
+        }
+		        catch (Exception e) {
+		                e.printStackTrace();
+                }
+
 		return isAuthTypeStatusUpdated;
+	}
+
+	@Override
+	public IdResponseDTO updateAuthTypeStatus(String individualId, IdType idType, List<AuthStatusUpdateDto> authTypeStatusList)
+			throws ResidentServiceCheckedException {
+		authTypeStatusList.stream().filter(
+						status -> !status.getLocked() && Objects.nonNull(status.getUnlockForSeconds()) && status.getUnlockForSeconds() > 0)
+				.forEach(status -> {
+					status.setLocked(true);
+					status.setMetadata(Collections.singletonMap(UNLOCK_EXP_TIMESTAMP, DateUtils
+							.formatToISOString(DateUtils.getUTCCurrentDateTime().plusSeconds(status.getUnlockForSeconds()))));
+				});
+		String uin = idType == IdType.VID ? getUin(individualId) : individualId;
+		IdResponseDTO updateAuthTypeStatus = doUpdateAuthTypeStatus(uin, authTypeStatusList);
+
+		List<String> partnerIds = getPartnerIds();
+		partnerIds.forEach(partnerId -> {
+			String topic = partnerId + "/" + IDAEventType.AUTH_TYPE_STATUS_UPDATE.name();
+			webSubHelper.publishAuthTypeStatusUpdateEvent(uin, authTypeStatusList, topic, partnerId);
+		});
+
+		return updateAuthTypeStatus;
+	}
+
+	private List<String> getPartnerIds() {
+	}
+
+	private IdResponseDTO doUpdateAuthTypeStatus(String uin, List<AuthStatusUpdateDto> authTypeStatusList) {
+		logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::doUpdateAuthTypeStatus():: entry");
+		IdResponseDTO updateAuthTypeStatus = new IdResponseDTO();
+		
+	}
+
+	private String getUin(String individualId) {
+		return individualId.split("-")[0];
 	}
 
 	@Override

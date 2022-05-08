@@ -1,19 +1,11 @@
 package io.mosip.resident.service;
 
 import io.mosip.resident.constant.AuthTypeStatus;
-import io.mosip.resident.dto.AuthHistoryRequestDTO;
-import io.mosip.resident.dto.AuthHistoryResponseDTO;
-import io.mosip.resident.dto.AuthLockOrUnLockRequestDto;
-import io.mosip.resident.dto.EuinRequestDTO;
-import io.mosip.resident.dto.RegStatusCheckResponseDTO;
-import io.mosip.resident.dto.RequestDTO;
-import io.mosip.resident.dto.ResidentReprintRequestDto;
-import io.mosip.resident.dto.ResidentReprintResponseDto;
-import io.mosip.resident.dto.ResidentUpdateRequestDto;
-import io.mosip.resident.dto.ResidentUpdateResponseDTO;
-import io.mosip.resident.dto.ResponseDTO;
+import io.mosip.resident.constant.IdType;
+import io.mosip.resident.dto.*;
 import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
+import java.util.List;
 
 public interface ResidentService {
 
@@ -32,5 +24,8 @@ public interface ResidentService {
 	public AuthHistoryResponseDTO reqAuthHistory(AuthHistoryRequestDTO dto) throws ResidentServiceCheckedException;
 	
 	public ResidentUpdateResponseDTO reqUinUpdate(ResidentUpdateRequestDto dto) throws ResidentServiceCheckedException;
+
+	public IdResponseDTO updateAuthTypeStatus(String individualId, IdType idType, List<AuthStatusUpdateDto> authTypeStatusList)
+			throws ResidentServiceCheckedException;
 
 }
