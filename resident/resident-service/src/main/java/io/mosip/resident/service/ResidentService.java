@@ -25,7 +25,7 @@ public interface ResidentService {
 	
 	public ResidentUpdateResponseDTO reqUinUpdate(ResidentUpdateRequestDto dto) throws ResidentServiceCheckedException;
 
-	public IdResponseDTO updateAuthTypeStatus(String individualId, IdType idType, List<AuthStatusUpdateDto> authTypeStatusList)
+	public IdResponseDTO updateAuthTypeStatus(String individualId, IdType idType, List<io.mosip.resident.dto.AuthTypeStatus> authTypeStatusList)
 			throws ResidentServiceCheckedException;
 
 }

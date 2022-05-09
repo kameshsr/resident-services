@@ -5,6 +5,8 @@ package io.mosip.resident.dto;
 
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * @author M1022006
  *
@@ -21,4 +23,10 @@ public class AuthTypeStatus {
 	private Long unlockForSeconds;
 
 	private String requestId;
+
+	private Map<String, Object> metadata;
+
+	public boolean getLocked() {
+		return locked;
+	}
 }

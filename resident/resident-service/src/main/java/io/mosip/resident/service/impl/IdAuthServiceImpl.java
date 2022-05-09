@@ -178,8 +178,10 @@ public class IdAuthServiceImpl implements IdAuthService {
 		String identityBlock = mapper.writeValueAsString(request);
 
 		final SecretKey secretKey = keyGenerator.getSymmetricKey();
+		logger.debug("IdAuthServiceImpl::internelOtpAuth()::secretKey", secretKey);
 		// Encrypted request with session key
 		byte[] encryptedIdentityBlock = encryptor.symmetricEncrypt(secretKey, identityBlock.getBytes(), null);
+		logger.debug("Encrypted request with session key is : " + encryptedIdentityBlock);
 		// rbase64 encoded for request
 		authRequestDTO.setRequest(CryptoUtil.encodeToURLSafeBase64(encryptedIdentityBlock));
 		// encrypted with MOSIP public key and encoded session key

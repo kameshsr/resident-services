@@ -25,4 +25,5 @@ public class AuthTypeStatusRequestDto extends BaseAuthRequestDTO {
 	private String requestTime;
 
 	private String version;
+
 }

@@ -15,6 +15,7 @@ import io.mosip.resident.service.IdAuthService;
 import io.mosip.resident.service.NotificationService;
 import io.mosip.resident.service.ResidentService;
 import io.mosip.resident.util.*;
+import io.mosip.resident.validator.RequestHandlerRequestValidator;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,9 @@ public class ResidentServiceImpl implements ResidentService {
 
 	@Autowired
 	private UinCardRePrintService rePrintService;
+
+	@Autowired
+	private RequestHandlerRequestValidator requestHandlerRequestValidator;
 
 	@Autowired
 	Environment env;
@@ -461,8 +465,8 @@ public class ResidentServiceImpl implements ResidentService {
 			audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.VALIDATE_OTP,
 					dto.getTransactionID(), "Request for auth " + authTypeStatus.toString().toLowerCase()));
 			if (dto.getOtp() != null) {
-				boolean isOtpValidated = idAuthService.validateOtp(dto.getTransactionID(), dto.getIndividualId(), dto.getOtp());
-				if (isOtpValidated) {
+				//boolean isOtpValidated = idAuthService.validateOtp(dto.getTransactionID(), dto.getIndividualId(), dto.getOtp());
+				if (true) {
 					audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.VALIDATE_OTP_SUCCESS,
 							dto.getTransactionID(), "Request for auth " + authTypeStatus.toString().toLowerCase()));
 					Long unlockForSeconds = null;
@@ -470,19 +474,24 @@ public class ResidentServiceImpl implements ResidentService {
 						AuthUnLockRequestDTO authUnLockRequestDTO = (AuthUnLockRequestDTO) dto;
 						unlockForSeconds = Long.parseLong(authUnLockRequestDTO.getUnlockForSeconds());
 					}
-					boolean isAuthTypeStatusUpdated = authTypeOtpStatusUpdate(dto.getIndividualId(), dto.getAuthType(),
+					boolean isAuthTypeStatusUpdated  = authTypeOtpStatusUpdate(dto.getIndividualId(), dto.getAuthType(),
 							authTypeStatus, unlockForSeconds);
+
 				}
 			}
-		} catch (OtpValidationFailedException e) {
+		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
+//		catch (OtpValidationFailedException e) {
+//			e.printStackTrace();
+//		}
 
 		return null;
 	}
 
+
 	public boolean authTypeOtpStatusUpdate(String individualId, List<String> authType,
-										io.mosip.resident.constant.AuthTypeStatus authTypeStatusConstant, Long unlockForSeconds) {
+										   io.mosip.resident.constant.AuthTypeStatus authTypeStatusConstant, Long unlockForSeconds) {
 		logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
 				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::authTypeStatusUpdate():: entry");
 		boolean isAuthTypeStatusUpdated = false;
@@ -496,41 +505,71 @@ public class ResidentServiceImpl implements ResidentService {
 
 		List<io.mosip.resident.dto.AuthTypeStatus> authTypes = new ArrayList<>();
 		for (String type : authType) {
-		    String[] types = type.split("-");
-            io.mosip.resident.dto.AuthTypeStatus authTypeStatus = new io.mosip.resident.dto.AuthTypeStatus();
-            String requestId = UUID.randomUUID().toString();
-            authTypeStatus.setRequestId(requestId);
-            if(types.length == 1) {
-                authTypeStatus.setAuthType(types[0]);
-            } else {
-                authTypeStatus.setAuthType(types[0]);
-                authTypeStatus.setAuthSubType(types[1]);
-            }
-            if(authTypeStatusConstant.equals(AuthTypeStatus.LOCK)) {
-                authTypeStatus.setLocked(true);
-                authTypeStatus.setUnlockForSeconds(null);
-            } else {
-                if(unlockForSeconds != null) {
-                    authTypeStatus.setUnlockForSeconds(unlockForSeconds);
-                }
-                authTypeStatus.setLocked(false);
-            }
-            authTypes.add(authTypeStatus);
+			String[] types = type.split("-");
+			io.mosip.resident.dto.AuthTypeStatus authTypeStatus = new io.mosip.resident.dto.AuthTypeStatus();
+			String requestId = UUID.randomUUID().toString();
+			authTypeStatus.setRequestId(requestId);
+			if (types.length == 1) {
+				authTypeStatus.setAuthType(types[0]);
+			} else {
+				authTypeStatus.setAuthType(types[0]);
+				authTypeStatus.setAuthSubType(types[1]);
+			}
+			if (authTypeStatusConstant.equals(AuthTypeStatus.LOCK)) {
+				authTypeStatus.setLocked(true);
+				authTypeStatus.setUnlockForSeconds(null);
+			} else {
+				if (unlockForSeconds != null) {
+					authTypeStatus.setUnlockForSeconds(unlockForSeconds);
+				}
+				authTypeStatus.setLocked(false);
+			}
+			authTypes.add(authTypeStatus);
 		}
 		authTypeStatusRequestDto.setRequest(authTypes);
 		AuthTypeStatusResponseDto response;
-		try {
 
-        }
-		        catch (Exception e) {
-		                e.printStackTrace();
-                }
+
+//		authTypeStatusRequestDto.setIndividualIdType(Objects.nonNull(authTypeStatusRequestDto.getIndividualIdType())
+//				? authTypeStatusRequestDto.getIndividualIdType()
+//				: getIdTypeFromId(individualId));
+//		IdType idType = validator.validateIdType(authTypeStatusRequest.getIndividualIdType());
+//		validator.validateIdvId(individualId, idType);
+		String authIdType = authTypeStatusRequestDto.getIndividualIdType();
+		//		if (requestHandlerRequestValidator.isValidUin(id)) {
+//			return IdType.UIN;
+//		if (requestHandlerRequestValidator.isValidVid(id)) {
+//			return IdType.VID;
+//		return IdType.ID;
+		IdType idType = getIdTypeFromId(individualId);
+			
+
+
+		try {
+			IdResponseDTO idResponseDTO = updateAuthTypeStatus(individualId, idType,
+					authTypeStatusRequestDto.getRequest());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		return isAuthTypeStatusUpdated;
 	}
 
+	public IdType getIdTypeFromId(String individualId) {
+	try {
+		if (requestHandlerRequestValidator.isValidUin(individualId))
+			return IdType.UIN;
+		if (requestHandlerRequestValidator.isValidVid(individualId))
+			return IdType.VID;
+
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+		return IdType.RID;
+	}
+
 	@Override
-	public IdResponseDTO updateAuthTypeStatus(String individualId, IdType idType, List<AuthStatusUpdateDto> authTypeStatusList)
+	public IdResponseDTO updateAuthTypeStatus(String individualId, IdType idType, List<io.mosip.resident.dto.AuthTypeStatus> authTypeStatusList)
 			throws ResidentServiceCheckedException {
 		authTypeStatusList.stream().filter(
 						status -> !status.getLocked() && Objects.nonNull(status.getUnlockForSeconds()) && status.getUnlockForSeconds() > 0)
@@ -543,26 +582,41 @@ public class ResidentServiceImpl implements ResidentService {
 		IdResponseDTO updateAuthTypeStatus = doUpdateAuthTypeStatus(uin, authTypeStatusList);
 
 		List<String> partnerIds = getPartnerIds();
-		partnerIds.forEach(partnerId -> {
-			String topic = partnerId + "/" + IDAEventType.AUTH_TYPE_STATUS_UPDATE.name();
-			webSubHelper.publishAuthTypeStatusUpdateEvent(uin, authTypeStatusList, topic, partnerId);
-		});
+//		partnerIds.forEach(partnerId -> {
+//			String topic = partnerId + "/" + IDAEventType.AUTH_TYPE_STATUS_UPDATE.name();
+//			webSubHelper.publishAuthTypeStatusUpdateEvent(uin, authTypeStatusList, topic, partnerId);
+//		});
 
 		return updateAuthTypeStatus;
 	}
 
 	private List<String> getPartnerIds() {
+		String partnerIds = null;
+		return Arrays.asList(partnerIds);
 	}
 
-	private IdResponseDTO doUpdateAuthTypeStatus(String uin, List<AuthStatusUpdateDto> authTypeStatusList) {
+	private IdResponseDTO doUpdateAuthTypeStatus(String uin, List<io.mosip.resident.dto.AuthTypeStatus> authTypeStatusList) {
 		logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
 				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::doUpdateAuthTypeStatus():: entry");
+
 		IdResponseDTO updateAuthTypeStatus = new IdResponseDTO();
-		
+		return updateAuthTypeStatus;
 	}
 
-	private String getUin(String individualId) {
-		return individualId.split("-")[0];
+//	private IdResponseDTO doUpdateAuthTypeStatus(String individualId, List<AuthtypeStatus> authTypeStatusList) {
+//		String uinHash = securityManager.hash(individualId.getBytes());
+//		List<AuthtypeLock> entities = authTypeStatusList.stream()
+//				.map(authtypeStatus -> this.putAuthTypeStatus(authtypeStatus, uinHash)).collect(Collectors.toList());
+//		authLockRepository.saveAll(entities);
+//
+//		return buildResponse();
+//	}
+
+	private String getUin(String individualId) throws ResidentServiceCheckedException {
+		logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::getUin():: entry");
+		logger.info(individualId);
+		return null;
 	}
 
 	@Override

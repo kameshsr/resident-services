@@ -142,7 +142,7 @@ public class ResidentController {
 	}
 
 	@ResponseFilter
-	@PostMapping(value = "/req/auth-otp-lock")
+	@PostMapping(value = "/req/auth-type-lock")
 	@Operation(summary = "reqAauthOtpLock", description = "reqAauthOtpLock", tags = { "resident-controller" })
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "OK"),
