@@ -1,6 +1,7 @@
 package io.mosip.resident.exception;
 
 import io.mosip.kernel.core.exception.BaseUncheckedException;
+import io.mosip.kernel.websub.api.exception.WebSubClientException;
 import io.mosip.resident.constant.ResidentErrorCode;
 
 /**
@@ -51,4 +52,7 @@ public class ResidentServiceException extends BaseUncheckedException {
 		this(err.getErrorCode(), err.getErrorMessage(), rootCause);
 	}
 
+    public ResidentServiceException(WebSubClientException e) {
+		super(e.getErrorCode(), e.getErrorText(), e);
+    }
 }

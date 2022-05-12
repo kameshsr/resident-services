@@ -22,4 +22,7 @@ public class ResidentConstants {
     public static final String CRYPTO_DECRYPT_URI = "mosip.resident.keymanager.decrypt-uri";
 
     public static final String VIRUS_SCANNER_ENABLED = "mosip.resident.virus-scanner.enabled";
+
+    /** The Constant SESSION_ID. */
+    public static final String SESSION_ID = "sessionId";
 }
