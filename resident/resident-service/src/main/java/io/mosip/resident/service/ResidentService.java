@@ -28,7 +28,9 @@ public interface ResidentService {
 			throws ResidentServiceCheckedException;
 
 	public AuthHistoryResponseDTO reqAuthHistory(AuthHistoryRequestDTO dto) throws ResidentServiceCheckedException;
-	
+
+	public AuthHistoryResponseDTO reqAuthHistoryV2(AuthHistoryRequestDTO dto) throws ResidentServiceCheckedException;
+
 	public ResidentUpdateResponseDTO reqUinUpdate(ResidentUpdateRequestDto dto) throws ResidentServiceCheckedException;
 
 	ResponseDTO reqAauthTypeStatusUpdateV2(AuthLockOrUnLockRequestDto request, AuthTypeStatus lock) throws ResidentServiceCheckedException;

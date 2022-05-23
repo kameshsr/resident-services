@@ -249,6 +249,29 @@ public class ResidentController {
 		return response;
 	}
 
+	@ResponseFilter
+	@PostMapping(value = "/req/auth-historyV2")
+	@Operation(summary = "reqAuthHistory", description = "reqAuthHistory", tags = { "resident-controller" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "OK"),
+			@ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(hidden = true))) })
+	public ResponseWrapper<AuthHistoryResponseDTO> reqAuthHistoryV2(
+			@Valid @RequestBody RequestWrapper<AuthHistoryRequestDTO> requestDTO)
+			throws ResidentServiceCheckedException {
+		audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.VALIDATE_REQUEST, "request auth history"));
+		validator.validateAuthHistoryRequest(requestDTO);
+		ResponseWrapper<AuthHistoryResponseDTO> response = new ResponseWrapper<>();
+		audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.REQ_AUTH_HISTORY,
+				requestDTO.getRequest().getTransactionID()));
+		response.setResponse(residentService.reqAuthHistoryV2(requestDTO.getRequest()));
+		audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.REQ_AUTH_HISTORY_SUCCESS,
+				requestDTO.getRequest().getTransactionID()));
+		return response;
+	}
+
 	@Deprecated
 	@ResponseFilter
 	@PostMapping(value = "/req/update-uin")
