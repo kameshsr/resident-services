@@ -55,6 +55,7 @@ public class ResidentOtpServiceImpl implements ResidentOtpService {
 			responseDto = residentServiceRestClient.postApi(
 					env.getProperty(ApiName.OTP_GEN_URL.name()), MediaType.APPLICATION_JSON, otpRequestDTO,
 					OtpResponseDTO.class);
+
 			if((responseDto.getErrors() ==null || responseDto.getErrors().isEmpty() )&& responseDto.getResponse()!= null) {
 				{
 					insertData(otpRequestDTO);

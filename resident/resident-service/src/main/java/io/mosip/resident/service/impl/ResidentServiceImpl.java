@@ -5,6 +5,7 @@ import io.mosip.kernel.core.http.ResponseWrapper;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.util.CryptoUtil;
 import io.mosip.kernel.core.util.DateUtils;
+import io.mosip.kernel.core.util.HMACUtils2;
 import io.mosip.resident.config.LoggerConfiguration;
 import io.mosip.resident.constant.AuthTypeStatus;
 import io.mosip.resident.constant.*;
@@ -95,6 +96,9 @@ public class ResidentServiceImpl implements ResidentService {
 
 	@Autowired
 	private PartnerServiceImpl partnerServiceImpl;
+
+	@Autowired
+	private IdentityServiceImpl identityServiceImpl;
 
 	@Value("${resident.center.id}")
 	private String centerId;
@@ -557,7 +561,7 @@ public class ResidentServiceImpl implements ResidentService {
 		AuthHistoryResponseDTO response = new AuthHistoryResponseDTO();
 
 		try {
-			getAuthTransaction(dto.getIndividualId());
+			getAuthTransaction(dto.getIndividualId(), dto.getTransactionID());
 			List<AuthTxnDetailsDTO> details = idAuthService.getAuthHistoryDetails(dto.getIndividualId(),
 						dto.getPageStart(), dto.getPageFetch());
 				if (details != null) {
@@ -606,12 +610,24 @@ public class ResidentServiceImpl implements ResidentService {
 		return response;
 	}
 
-	private void getAuthTransaction(String individualId) {
+	private void getAuthTransaction(String individualId, String transactionId)
+			throws ResidentServiceCheckedException {
 		try{
 			if(validator.validateUin(individualId)) {
 				logger.info("I am UIN");
 				ArrayList<String> partnerIds= partnerServiceImpl.getPartnerDetails("Online_Verification_Partner");
-
+				for(String partnerId:partnerIds) {
+					String idaToken = identityServiceImpl.getIDAToken(individualId, partnerId);
+					if(idaToken!=null) {
+						List<ResidentTransactionEntity> residentTransactionEntity = residentTransactionRepository.findByRequestTrnIdAndRefIdOrderByCrDtimesDesc(transactionId, getRefIdHash(individualId));
+						if(residentTransactionEntity!=null && residentTransactionEntity.size()>0) {
+							for(ResidentTransactionEntity residentTransactionEntity2:residentTransactionEntity) {
+								logger.info("Transaction Id : "+residentTransactionEntity2.getRequestTrnId());
+								logger.info("Ref Id : "+residentTransactionEntity2.getRefId());
+							}
+						}
+					}
+				}
 			} else{
 				logger.info("I am VID");
 			}
@@ -627,6 +643,10 @@ public class ResidentServiceImpl implements ResidentService {
 			throw new ResidentServiceException(ResidentErrorCode.NOTIFICATION_FAILURE.getErrorCode(),
 					ResidentErrorCode.NOTIFICATION_FAILURE.getErrorMessage(), e);
 		}
+	}
+
+	private String getRefIdHash(String individualId) throws NoSuchAlgorithmException {
+		return HMACUtils2.digestAsPlainText(individualId.getBytes());
 	}
 
 	private NotificationResponseDTO sendNotification(String id, NotificationTemplateCode templateTypeCode,

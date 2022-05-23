@@ -79,7 +79,7 @@ public class WebSubUpdateAuthTypeServiceImpl implements WebSubUpdateAuthTypeServ
             subscriptionRequest.setHubURL(hubUrl);
             subscribe.subscribe(subscriptionRequest);
 
-            insertInResidentTransactionTable(eventModel,partnerId,"COMPLETED");
+            //insertInResidentTransactionTable(eventModel,partnerId,"COMPLETED");
 
         }
         catch (Exception e) {
