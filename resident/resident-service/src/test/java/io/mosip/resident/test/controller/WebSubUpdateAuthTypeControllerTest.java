@@ -93,12 +93,13 @@ public class WebSubUpdateAuthTypeControllerTest {
         EventModel e1=new EventModel();
         Event event=new Event();
         event.setTransactionId("1234");
+        event.setId("1234");
 
         e1.setEvent(event);
         e1.setTopic("AUTH_TYPE_STATUS_UPDATE_ACK");
         e1.setPublishedOn(String.valueOf(LocalDateTime.now()));
         e1.setPublisher("AUTH_TYPE_STATUS_UPDATE_ACK");
-        webSubUpdateAuthTypeController.authTypeCallback(eventModel);
+        webSubUpdateAuthTypeController.authTypeCallback(e1);
 
         mockMvc.perform((MockMvcRequestBuilders.post("/callback/authTypeCallback/{partnerId}", "1234567891"))
                 .contentType(MediaType.APPLICATION_JSON)
