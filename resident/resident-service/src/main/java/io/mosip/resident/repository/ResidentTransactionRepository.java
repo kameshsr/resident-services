@@ -2,7 +2,10 @@ package io.mosip.resident.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import io.mosip.resident.entity.ResidentTransactionEntity;
@@ -16,4 +19,10 @@ import io.mosip.resident.entity.ResidentTransactionEntity;
 public interface ResidentTransactionRepository extends JpaRepository<ResidentTransactionEntity, String> {
     public List<ResidentTransactionEntity> findByRequestTrnIdAndRefIdOrderByCrDtimesDesc(String requestTrnId, String refId);
     public ResidentTransactionEntity findByAid(String aid);
+
+    @Query(value = "Select new ResidentTransactionEntity(aid) " +
+            "from ResidentTransactionEntity where tokenId=:tokenId "  +
+            " AND authTypeCode =:residentTransactionType" )
+    List<ResidentTransactionEntity> findRequestIdByToken(@Param("tokenId") String tokenId,@Param("residentTransactionType") String residentTransactionType,
+                                                           Pageable pagaeable);
 }

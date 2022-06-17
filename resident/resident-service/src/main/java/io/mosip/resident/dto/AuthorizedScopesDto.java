@@ -36,5 +36,7 @@ public class AuthorizedScopesDto {
 	private List<String> postUploadDocuments;
 	
 	private List<String> getUploadedDocuments;
+
+	private List<String> getServiceRequestUpdate;
 	
 }

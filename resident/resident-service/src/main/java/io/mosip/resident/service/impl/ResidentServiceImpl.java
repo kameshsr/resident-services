@@ -863,8 +863,8 @@ public class ResidentServiceImpl implements ResidentService {
 			residentTransactionEntity.setAid(hash);
 			residentTransactionEntity.setRequestDtimes(LocalDateTime.now());
 			residentTransactionEntity.setResponseDtime(LocalDateTime.now());
-			residentTransactionEntity.setRequestTypeCode(ResidentTransactionType.AUTH_TYPE_LOCK_OR_UNLOCK.toString());
-			residentTransactionEntity.setRequestSummary(ResidentTransactionType.AUTH_TYPE_LOCK_OR_UNLOCK.toString());
+			residentTransactionEntity.setRequestTypeCode(ResidentTransactionType.AUTHENTICATION_REQUEST.toString());
+			residentTransactionEntity.setRequestSummary(ResidentTransactionType.AUTHENTICATION_REQUEST.toString());
 			residentTransactionEntity.setStatusCode("NEW");
 			residentTransactionEntity.setStatusComment(isAuthSuccess ? "Success" : "Failure");
 			residentTransactionEntity.setLangCode("eng");
@@ -1203,5 +1203,41 @@ public class ResidentServiceImpl implements ResidentService {
 			aidStatusResponseDTO.setAidStatus(ridStatus.getRidStatus());
 			return aidStatusResponseDTO;
 		}
+	}
+
+	@Override
+	public ResponseDTO getServiceRequestUpdate(Integer pageStart, Integer pageFetch) {
+		logger.info(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+				LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::getServiceRequestUpdate()::entry");
+		ResponseDTO responseDTO = new ResponseDTO();
+		try{
+			if(pageStart == null) {
+				if(pageFetch == null) {
+					pageStart = DEFAULT_PAGE_START;
+					pageFetch = DEFAULT_PAGE_COUNT;
+				} else {
+					pageStart = DEFAULT_PAGE_START;
+				}
+			} else {
+				if(pageFetch == null) {
+					pageFetch = DEFAULT_PAGE_COUNT;
+				}
+			}
+			if(pageStart < 0) {
+				throw new ResidentServiceCheckedException(ResidentErrorCode.INVALID_PAGE_START_VALUE);
+			} else if(pageFetch < 0) {
+				throw new ResidentServiceCheckedException(ResidentErrorCode.INVALID_PAGE_FETCH_VALUE);
+			}
+			PageRequest pageRequest = PageRequest.of(pageStart-1, pageFetch);
+			String idaToken = identityServiceImpl.getResidentIdaToken();
+			List<ResidentTransactionEntity> residentTransactionEntities = residentTransactionRepository.findRequestIdByToken(idaToken, ResidentTransactionType.SERVICE_REQUEST.toString(),pageRequest);
+			logger.info(residentTransactionEntities.size()+"");
+		}
+		catch (Exception e) {
+			logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+					LoggerFileConstant.APPLICATIONID.toString(), "ResidentServiceImpl::getServiceRequestUpdate()::Exception");
+
+		}
+		return null;
 	}
 }

@@ -36,4 +36,6 @@ public interface ResidentService {
 
 	AidStatusResponseDTO getAidStatus(AidStatusRequestDTO reqDto)
 			throws ResidentServiceCheckedException, ApisResourceAccessException, OtpValidationFailedException;
+
+    ResponseDTO getServiceRequestUpdate(Integer pageStart, Integer pageFetch);
 }

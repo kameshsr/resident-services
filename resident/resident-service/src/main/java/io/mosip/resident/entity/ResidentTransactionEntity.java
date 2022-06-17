@@ -100,4 +100,7 @@ public class ResidentTransactionEntity {
     @Column(name = "del_dtimes")
     private LocalDateTime delDtimes;
 
+    public ResidentTransactionEntity(String aid) {
+        this.aid = aid;
+    }
 }
