@@ -3,6 +3,56 @@
  */
 package io.mosip.resident.test.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.mosip.kernel.cbeffutil.impl.CbeffImpl;
+import io.mosip.kernel.core.authmanager.spi.ScopeValidator;
+import io.mosip.kernel.core.crypto.spi.CryptoCoreSpec;
+import io.mosip.kernel.core.exception.ServiceError;
+import io.mosip.kernel.core.util.DateUtils;
+import io.mosip.resident.constant.IdType;
+import io.mosip.resident.constant.ResidentErrorCode;
+import io.mosip.resident.controller.ResidentController;
+import io.mosip.resident.dto.*;
+import io.mosip.resident.exception.ApisResourceAccessException;
+import io.mosip.resident.exception.ResidentServiceCheckedException;
+import io.mosip.resident.helper.ObjectStoreHelper;
+import io.mosip.resident.service.DocumentService;
+import io.mosip.resident.service.ResidentVidService;
+import io.mosip.resident.service.impl.IdAuthServiceImpl;
+import io.mosip.resident.service.impl.IdentityServiceImpl;
+import io.mosip.resident.service.impl.ResidentServiceImpl;
+import io.mosip.resident.test.ResidentTestBootApplication;
+import io.mosip.resident.util.AuditUtil;
+import io.mosip.resident.validator.RequestValidator;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.RestTemplate;
+
+import javax.crypto.SecretKey;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -13,105 +63,51 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.crypto.SecretKey;
-
-import io.mosip.kernel.core.exception.ErrorResponse;
-import io.mosip.kernel.core.exception.ServiceError;
-import io.mosip.resident.constant.ResidentErrorCode;
-import io.mosip.resident.dto.*;
-import io.mosip.resident.exception.ResidentServiceCheckedException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.client.RestTemplate;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import io.mosip.kernel.cbeffutil.impl.CbeffImpl;
-import io.mosip.kernel.core.authmanager.spi.ScopeValidator;
-import io.mosip.kernel.core.crypto.spi.CryptoCoreSpec;
-import io.mosip.kernel.core.util.DateUtils;
-import io.mosip.resident.constant.IdType;
-import io.mosip.resident.controller.ResidentController;
-import io.mosip.resident.exception.ApisResourceAccessException;
-import io.mosip.resident.helper.ObjectStoreHelper;
-import io.mosip.resident.service.DocumentService;
-import io.mosip.resident.service.ResidentVidService;
-import io.mosip.resident.service.impl.IdAuthServiceImpl;
-import io.mosip.resident.service.impl.IdentityServiceImpl;
-import io.mosip.resident.service.impl.ResidentServiceImpl;
-import io.mosip.resident.test.ResidentTestBootApplication;
-import io.mosip.resident.util.AuditUtil;
-import io.mosip.resident.validator.RequestValidator;
-
 /**
  * @author Sowmya Ujjappa Banakar
  * @author Jyoti Prakash Nayak
  *
  */
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(classes = ResidentTestBootApplication.class)
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application.properties")
 public class ResidentControllerTest {
 
-	@MockBean
+	@Mock
 	private ResidentServiceImpl residentService;
 
 	@Mock
 	CbeffImpl cbeff;
 
-	@MockBean
+	@Mock
 	private RequestValidator validator;
 	
-	@MockBean
+	@Mock
 	private ResidentVidService vidService;
 	
-	@MockBean
+	@Mock
 	private IdAuthServiceImpl idAuthServiceImpl;
 	
-	@MockBean
+	@Mock
 	private IdentityServiceImpl identityServiceImpl;
 	
-	@MockBean
+	@Mock
 	private DocumentService docService;
 	
-	@MockBean
+	@Mock
 	private ScopeValidator scopeValidator;
 	
-	@MockBean
+	@Mock
 	private ObjectStoreHelper objectStore;
 	
 	@Mock
 	private AuditUtil audit;
 
-	@MockBean
+	@Mock
 	private CryptoCoreSpec<byte[], byte[], SecretKey, PublicKey, PrivateKey, String> encryptor;
 
-	@MockBean
+	@Mock
 	@Qualifier("selfTokenRestTemplate")
 	private RestTemplate residentRestTemplate;
 
@@ -138,6 +134,9 @@ public class ResidentControllerTest {
 
 	@Before
 	public void setUp() throws ApisResourceAccessException {
+		MockitoAnnotations.initMocks(this);
+		this.mockMvc = MockMvcBuilders.standaloneSetup(residentController).build();
+
 		MockitoAnnotations.initMocks(this);
 		authLockRequest = new RequestWrapper<AuthLockOrUnLockRequestDto>();
 
@@ -215,7 +214,7 @@ public class ResidentControllerTest {
 		validator.validateAuthLockOrUnlockRequestV2(authTypeStatusRequest);
 		this.mockMvc
 				.perform(post("/req/auth-type-status").contentType(MediaType.APPLICATION_JSON).content(authStatusRequestToJson))
-				.andExpect(status().isOk()).andExpect(status().isOk());
+				.andExpect(status().isOk()).andExpect(status().isOk()).andExpect(jsonPath("$.response.status", is("success")));
 	}
 
 
@@ -224,6 +223,7 @@ public class ResidentControllerTest {
 	@WithUserDetails("resident")
 	public void testReqAuthTypeLockBadRequest() throws Exception {
 		ResponseDTO responseDto = new ResponseDTO();
+
 		doNothing().when(validator).validateAuthLockOrUnlockRequest(Mockito.any(), Mockito.any());
 		Mockito.doReturn(responseDto).when(residentService).reqAauthTypeStatusUpdateV2( Mockito.any());
 

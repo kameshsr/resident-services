@@ -19,7 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
  * @author Kamesh Shekhar Prasad
  */
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ResidentServiceGetServiceHistoryTest {
 
     @Mock
@@ -91,12 +91,12 @@ public class ResidentServiceGetServiceHistoryTest {
         partnerIds.add("m-partner-default-auth");
         partnerIds.add("MOVP");
 
-        Mockito.when(residentTransactionRepository.findByToken(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(residentTransactionEntityList);
-        Mockito.when(residentTransactionRepository.findByTokenWithoutDate(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(residentTransactionEntityList);
-        Mockito.when(identityServiceImpl.getResidentIndvidualId()).thenReturn("8251649601");
-        Mockito.when(identityServiceImpl.getIDAToken(Mockito.anyString(), Mockito.anyString())).thenReturn("346697314566835424394775924659202696");
-        Mockito.when(partnerServiceImpl.getPartnerDetails(Mockito.anyString())).thenReturn(partnerIds);
-        Mockito.doNothing().when(audit).setAuditRequestDto(Mockito.any());
+        Mockito.lenient().when(residentTransactionRepository.findByToken(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(residentTransactionEntityList);
+        Mockito.lenient().when(residentTransactionRepository.findByTokenWithoutDate(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(residentTransactionEntityList);
+        Mockito.lenient().when(identityServiceImpl.getResidentIndvidualId()).thenReturn("8251649601");
+        Mockito.lenient().when(identityServiceImpl.getIDAToken(Mockito.anyString(), Mockito.anyString())).thenReturn("346697314566835424394775924659202696");
+        Mockito.lenient().when(partnerServiceImpl.getPartnerDetails(Mockito.anyString())).thenReturn(partnerIds);
+        Mockito.lenient().doNothing().when(audit).setAuditRequestDto(Mockito.any());
     }
 
     @Test
@@ -106,7 +106,7 @@ public class ResidentServiceGetServiceHistoryTest {
         fromDate = LocalDateTime.now();
         toDate = LocalDateTime.now();
 
-        Mockito.when(residentServiceImpl.getServiceHistory(pageStart, pageSize, LocalDateTime.now(), LocalDateTime.now(), serviceType, sortType)).thenReturn(serviceHistoryResponseDto);
+        Mockito.lenient().when(residentServiceImpl.getServiceHistory(pageStart, pageSize, LocalDateTime.now(), LocalDateTime.now(), serviceType, sortType)).thenReturn(serviceHistoryResponseDto);
         assertEquals(2, residentServiceImpl.getServiceHistory(pageStart, pageSize, LocalDateTime.now(), LocalDateTime.now(), serviceType, sortType).size());
         assertEquals(2, residentServiceImpl.getServiceHistory(pageStart, pageSize, LocalDateTime.now(), LocalDateTime.now(), serviceType, "DESC").size());
     }

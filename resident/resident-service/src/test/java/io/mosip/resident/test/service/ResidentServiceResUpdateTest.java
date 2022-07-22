@@ -1,59 +1,13 @@
 package io.mosip.resident.test.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-
 import io.mosip.kernel.core.exception.BaseCheckedException;
 import io.mosip.kernel.core.exception.FileNotFoundException;
 import io.mosip.kernel.core.idvalidator.spi.UinValidator;
 import io.mosip.resident.constant.ApiName;
 import io.mosip.resident.constant.IdType;
 import io.mosip.resident.constant.ResidentErrorCode;
-import io.mosip.resident.dto.MachineCreateResponseDTO;
-import io.mosip.resident.dto.MachineDto;
-import io.mosip.resident.dto.MachineErrorDTO;
-import io.mosip.resident.dto.MachineSearchResponseDTO;
-import io.mosip.resident.dto.NotificationResponseDTO;
-import io.mosip.resident.dto.PacketGeneratorResDto;
-import io.mosip.resident.dto.PacketSignPublicKeyErrorDTO;
-import io.mosip.resident.dto.PacketSignPublicKeyResponseDTO;
-import io.mosip.resident.dto.ResidentDocuments;
-import io.mosip.resident.dto.ResidentUpdateRequestDto;
-import io.mosip.resident.dto.ResidentUpdateResponseDTO;
-import io.mosip.resident.exception.ApisResourceAccessException;
-import io.mosip.resident.exception.OtpValidationFailedException;
-import io.mosip.resident.exception.ResidentServiceCheckedException;
-import io.mosip.resident.exception.ResidentServiceException;
-import io.mosip.resident.exception.ValidationFailedException;
+import io.mosip.resident.dto.*;
+import io.mosip.resident.exception.*;
 import io.mosip.resident.handler.service.ResidentUpdateService;
 import io.mosip.resident.helper.ObjectStoreHelper;
 import io.mosip.resident.repository.ResidentTransactionRepository;
@@ -65,8 +19,35 @@ import io.mosip.resident.util.AuditUtil;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import io.mosip.resident.util.Utilities;
 import io.mosip.resident.util.Utilitiy;
+import org.apache.commons.io.IOUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
-@RunWith(SpringRunner.class)
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ResidentServiceResUpdateTest {
 	@InjectMocks
 	ResidentServiceImpl residentServiceImpl;

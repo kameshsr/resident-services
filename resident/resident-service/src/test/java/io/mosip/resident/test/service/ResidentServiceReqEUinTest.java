@@ -1,17 +1,5 @@
 package io.mosip.resident.test.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import io.mosip.resident.constant.IdType;
 import io.mosip.resident.dto.EuinRequestDTO;
 import io.mosip.resident.dto.NotificationResponseDTO;
@@ -24,8 +12,18 @@ import io.mosip.resident.service.NotificationService;
 import io.mosip.resident.service.impl.ResidentServiceImpl;
 import io.mosip.resident.util.AuditUtil;
 import io.mosip.resident.util.UINCardDownloadService;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(SpringRunner.class)
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ResidentServiceReqEUinTest {
 	@InjectMocks
 	ResidentServiceImpl residentServiceImpl;

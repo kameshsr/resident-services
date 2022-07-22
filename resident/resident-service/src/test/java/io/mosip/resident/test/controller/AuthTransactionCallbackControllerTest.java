@@ -15,14 +15,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -37,13 +36,13 @@ import java.util.Map;
  * @author Kamesh Shekhar Prasad
  */
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(classes = ResidentTestBootApplication.class)
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application.properties")
 public class AuthTransactionCallbackControllerTest {
 
-    @MockBean
+    @Mock
     @Qualifier("selfTokenRestTemplate")
     private RestTemplate residentRestTemplate;
 
@@ -53,28 +52,28 @@ public class AuthTransactionCallbackControllerTest {
     @InjectMocks
     AuthTransactionCallbackController authTransactionCallbackController;
 
-    @MockBean
+    @Mock
     private AuthTransactionCallBackService authTransactionCallBackService;
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private VerificationService verificationService;
 
-    @MockBean
+    @Mock
     private IdAuthService idAuthService;
 
-    @MockBean
+    @Mock
     private ResidentVidService vidService;
 
-    @MockBean
+    @Mock
     private DocumentService docService;
 
-    @MockBean
+    @Mock
     private ObjectStoreHelper objectStore;
 
-    @MockBean
+    @Mock
     private VerificationServiceImpl verificationServiceImpl;
 
     @InjectMocks

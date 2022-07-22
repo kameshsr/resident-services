@@ -12,6 +12,7 @@
 
 -- This Table is used to save the  transaction related to residents.
 CREATE TABLE resident.resident_transaction(
+	event_id character varying(64) NOT NULL,
 	aid character varying(64) NOT NULL,
 	request_dtimes timestamp NOT NULL,
 	response_dtime timestamp NOT NULL,
@@ -38,11 +39,12 @@ CREATE TABLE resident.resident_transaction(
     request_signature character varying,
     response_signature character varying,
     olv_partner_id character varying(36),
-    CONSTRAINT pk_restrn_aid PRIMARY KEY (aid)
+    CONSTRAINT pk_restrn_event_id PRIMARY KEY (event_id)
 );
 
 COMMENT ON TABLE resident_transaction IS 'This Table is used to save the  transaction related to residents.';
-COMMENT ON COLUMN resident.resident_transaction.aid IS 'A unique identifier for each transaction';
+COMMENT ON COLUMN resident_transaction.event_id IS 'Unique Id of the transaction.';
+COMMENT ON COLUMN resident.resident_transaction.aid IS 'Unique Id of the application.';
 COMMENT ON COLUMN resident.resident_transaction.request_dtimes IS 'The time when the request is received by the service';
 COMMENT ON COLUMN resident.resident_transaction.response_dtime IS 'The time when the response is received by the service';
 COMMENT ON COLUMN resident.resident_transaction.request_trn_id IS 'The unique identifier for each transaction';

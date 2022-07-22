@@ -1,15 +1,20 @@
 package io.mosip.resident.test.controller;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.List;
-
-import javax.crypto.SecretKey;
-
-import io.mosip.resident.service.ResidentService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.mosip.kernel.cbeffutil.impl.CbeffImpl;
+import io.mosip.kernel.core.crypto.spi.CryptoCoreSpec;
+import io.mosip.kernel.core.http.RequestWrapper;
+import io.mosip.resident.controller.ResidentCredentialController;
+import io.mosip.resident.dto.*;
+import io.mosip.resident.helper.ObjectStoreHelper;
+import io.mosip.resident.service.DocumentService;
+import io.mosip.resident.service.ResidentCredentialService;
+import io.mosip.resident.service.ResidentVidService;
 import io.mosip.resident.service.impl.ResidentServiceImpl;
+import io.mosip.resident.test.ResidentTestBootApplication;
+import io.mosip.resident.util.AuditUtil;
+import io.mosip.resident.validator.RequestValidator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,41 +30,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import javax.crypto.SecretKey;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.List;
 
-import io.mosip.kernel.cbeffutil.impl.CbeffImpl;
-import io.mosip.kernel.core.crypto.spi.CryptoCoreSpec;
-import io.mosip.kernel.core.http.RequestWrapper;
-import io.mosip.resident.controller.ResidentCredentialController;
-import io.mosip.resident.dto.CredentialCancelRequestResponseDto;
-import io.mosip.resident.dto.CredentialRequestStatusResponseDto;
-import io.mosip.resident.dto.PartnerCredentialTypePolicyDto;
-import io.mosip.resident.dto.ResidentCredentialRequestDto;
-import io.mosip.resident.dto.ResidentCredentialRequestDtoV2;
-import io.mosip.resident.dto.ResidentCredentialResponseDto;
-import io.mosip.resident.dto.SharableAttributesDTO;
-import io.mosip.resident.helper.ObjectStoreHelper;
-import io.mosip.resident.service.DocumentService;
-import io.mosip.resident.service.ResidentCredentialService;
-import io.mosip.resident.service.ResidentVidService;
-import io.mosip.resident.test.ResidentTestBootApplication;
-import io.mosip.resident.util.AuditUtil;
-import io.mosip.resident.validator.RequestValidator;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(classes = ResidentTestBootApplication.class)
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application.properties")
 public class ResidentCredentialControllerTest {
 
-    @MockBean
+    @Mock
     private ResidentCredentialService residentCredentialService;
 
     @Mock
@@ -69,16 +59,16 @@ public class ResidentCredentialControllerTest {
 
     @Mock
     private AuditUtil audit;
-	
+
 	@MockBean
 	private ResidentVidService vidService;
-	
+
 	@MockBean
 	private DocumentService docService;
 
     @MockBean
     private ResidentServiceImpl residentService;
-	
+
 	@MockBean
 	private ObjectStoreHelper objectStore;
 
@@ -183,7 +173,7 @@ public class ResidentCredentialControllerTest {
                 .andExpect(status().isOk());
     }
 
-    
+
     @Test
     public void testReqCredentialV2Success() throws Exception {
         Mockito.when(residentCredentialService.reqCredential(Mockito.any())).thenReturn(credentialReqResponse);

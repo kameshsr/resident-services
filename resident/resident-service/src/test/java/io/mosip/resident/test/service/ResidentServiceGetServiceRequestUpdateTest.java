@@ -20,8 +20,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.env.Environment;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ResidentServiceGetServiceRequestUpdateTest {
 
     @Mock
@@ -76,12 +76,12 @@ public class ResidentServiceGetServiceRequestUpdateTest {
         credentialRequestStatusResponseDto.setStatusCode("NEW");
         credentialRequestStatusResponseDto.setId("8067104584");
 
-        Mockito.when(partnerServiceImpl.getPartnerDetails(Mockito.anyString())).thenReturn(new ArrayList<>());
-        Mockito.when(identityServiceImpl.getResidentIdaToken()).thenReturn("346697314566835424394775924659202696");
-        Mockito.when(residentTransactionRepository.findRequestIdByToken(Mockito.anyString(), Mockito.anyString()
+        Mockito.lenient().when(partnerServiceImpl.getPartnerDetails(Mockito.anyString())).thenReturn(new ArrayList<>());
+        Mockito.lenient().when(identityServiceImpl.getResidentIdaToken()).thenReturn("346697314566835424394775924659202696");
+        Mockito.lenient().when(residentTransactionRepository.findRequestIdByToken(Mockito.anyString(), Mockito.anyString()
         , Mockito.any())).thenReturn(residentTransactionEntityList);
-        Mockito.when(residentCredentialServiceImpl.getStatus(Mockito.anyString())).thenReturn(credentialRequestStatusResponseDto);
-        Mockito.when(residentServiceImpl.getServiceRequestUpdate(null, null)).thenReturn(details);
+        Mockito.lenient().when(residentCredentialServiceImpl.getStatus(Mockito.anyString())).thenReturn(credentialRequestStatusResponseDto);
+        Mockito.lenient().when(residentServiceImpl.getServiceRequestUpdate(null, null)).thenReturn(details);
         Mockito.doNothing().when(audit).setAuditRequestDto(Mockito.any());
     }
 

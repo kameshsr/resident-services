@@ -1,35 +1,10 @@
 package io.mosip.resident.test.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-
 import io.mosip.kernel.core.exception.BaseCheckedException;
 import io.mosip.kernel.core.exception.ServiceError;
 import io.mosip.kernel.core.idvalidator.spi.UinValidator;
 import io.mosip.resident.constant.IdType;
-import io.mosip.resident.dto.NotificationResponseDTO;
-import io.mosip.resident.dto.PacketGeneratorResDto;
-import io.mosip.resident.dto.RegProcCommonResponseDto;
-import io.mosip.resident.dto.ResidentReprintRequestDto;
-import io.mosip.resident.dto.ResidentReprintResponseDto;
-import io.mosip.resident.dto.ResponseWrapper;
+import io.mosip.resident.dto.*;
 import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.OtpValidationFailedException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
@@ -40,9 +15,26 @@ import io.mosip.resident.service.NotificationService;
 import io.mosip.resident.service.impl.ResidentServiceImpl;
 import io.mosip.resident.util.AuditUtil;
 import io.mosip.resident.util.ResidentServiceRestClient;
-import io.mosip.resident.util.TokenGenerator;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
-@RunWith(SpringRunner.class)
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ResidentServiceReqReprintTest {
 	@InjectMocks
 	ResidentServiceImpl residentServiceImpl;
@@ -74,7 +66,7 @@ public class ResidentServiceReqReprintTest {
 	public void setUp() throws IOException, BaseCheckedException {
 		Mockito.when(idAuthService.validateOtp(Mockito.anyString(), Mockito.anyString(),
 				Mockito.anyString())).thenReturn(true);
-		Mockito.when(uinValidator.validateId(Mockito.anyString())).thenReturn(true);
+		Mockito.lenient().when(uinValidator.validateId(Mockito.anyString())).thenReturn(true);
 		residentReqDto = new ResidentReprintRequestDto();
 		residentReqDto.setIndividualId("3527812406");
 		residentReqDto.setIndividualIdType(IdType.UIN.name());
@@ -173,7 +165,7 @@ public class ResidentServiceReqReprintTest {
 		reprintResp.setRegistrationId("10008200070004620191203115734");
 		reprintResp.setStatus("success");
 		response.setResponse(reprintResp);
-		Mockito.when(residentServiceRestClient.postApi(any(), any(), any(), any())).thenReturn(response);
+		Mockito.lenient().when(residentServiceRestClient.postApi(any(), any(), any(), any())).thenReturn(response);
 		NotificationResponseDTO notificationResponse = new NotificationResponseDTO();
 		notificationResponse.setMessage("Notification sent to registered contact details");
 		notificationResponse.setStatus("success");

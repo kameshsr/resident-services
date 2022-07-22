@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class RequestValidatorTest {
 
 	@Mock
@@ -209,7 +209,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testValidIndividualId() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.any())).thenReturn(false);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.any())).thenReturn(false);
 		AuthLockOrUnLockRequestDto authLockRequestDto = new AuthLockOrUnLockRequestDto();
 		authLockRequestDto.setTransactionID("12345");
 		authLockRequestDto.setIndividualId("12345");
@@ -362,7 +362,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testAuthHistoryValidIndividualId() throws Exception {
-		Mockito.when(uinValidator.validateId(Mockito.anyString())).thenReturn(false);
+		Mockito.lenient().when(uinValidator.validateId(Mockito.anyString())).thenReturn(false);
 		AuthHistoryRequestDTO authRequestDTO = new AuthHistoryRequestDTO();
 		authRequestDTO.setIndividualId("123");
 		authRequestDTO.setPageFetch("1");
@@ -485,7 +485,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testeuinValidIndividualId() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(false);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(false);
 		EuinRequestDTO euinRequestDTO = new EuinRequestDTO();
 		euinRequestDTO.setIndividualIdType(IdType.VID.name());
 		RequestWrapper<EuinRequestDTO> requestWrapper = new RequestWrapper<>();
@@ -555,7 +555,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testeuinValidCardType() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
 		EuinRequestDTO euinRequestDTO = new EuinRequestDTO();
 		euinRequestDTO.setIndividualIdType(IdType.VID.name());
 		euinRequestDTO.setIndividualId("1234567");
@@ -571,7 +571,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testeuinValidOtp() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
 		EuinRequestDTO euinRequestDTO = new EuinRequestDTO();
 		euinRequestDTO.setIndividualIdType(IdType.VID.name());
 		euinRequestDTO.setIndividualId("1234567");
@@ -587,7 +587,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testeuinValidTransactionId() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
 		EuinRequestDTO euinRequestDTO = new EuinRequestDTO();
 		euinRequestDTO.setIndividualIdType(IdType.VID.name());
 		euinRequestDTO.setIndividualId("1234567");
@@ -604,7 +604,7 @@ public class RequestValidatorTest {
 
 	@Test
 	public void testValidateEuinRequestSuccess() throws Exception{
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
 		EuinRequestDTO euinRequestDTO = new EuinRequestDTO();
 		euinRequestDTO.setIndividualIdType(IdType.VID.name());
 		euinRequestDTO.setIndividualId("1234567");
@@ -705,7 +705,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testGetStatusValidIndividualId() throws Exception {
-		Mockito.when(ridValidator.validateId(Mockito.anyString())).thenReturn(false);
+		Mockito.lenient().when(ridValidator.validateId(Mockito.anyString())).thenReturn(false);
 		RequestDTO requestDTO = new RequestDTO();
 		RequestWrapper<RequestDTO> requestWrapper = new RequestWrapper<>();
 		requestDTO.setIndividualIdType("INVALID_RID");
@@ -743,7 +743,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testUpdateValidIndividualId() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(false);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(false);
 		ResidentUpdateRequestDto requestDTO = new ResidentUpdateRequestDto();
 		RequestWrapper<ResidentUpdateRequestDto> requestWrapper = new RequestWrapper<>();
 		requestDTO.setIndividualIdType("VID");
@@ -899,7 +899,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testReprintValidIndividualId() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(false);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(false);
 		ResidentReprintRequestDto requestDTO = new ResidentReprintRequestDto();
 		RequestWrapper<ResidentReprintRequestDto> requestWrapper = new RequestWrapper<>();
 		requestDTO.setIndividualIdType("VID");
@@ -913,7 +913,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testReprintNullIndividualId() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
 		ResidentReprintRequestDto requestDTO = new ResidentReprintRequestDto();
 		RequestWrapper<ResidentReprintRequestDto> requestWrapper = new RequestWrapper<>();
 		requestDTO.setIndividualIdType("VID");
@@ -926,7 +926,7 @@ public class RequestValidatorTest {
 
 	@Test
 	public void testReprintSuccess() throws Exception{
-		Mockito.when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.anyString())).thenReturn(true);
 		ResidentReprintRequestDto requestDTO = new ResidentReprintRequestDto();
 		RequestWrapper<ResidentReprintRequestDto> requestWrapper = new RequestWrapper<>();
 		requestDTO.setIndividualIdType("VID");
@@ -1049,7 +1049,7 @@ public class RequestValidatorTest {
 
 	@Test(expected = InvalidInputException.class)
 	public void testValidIndividualIdForAuthUnlockRequest() throws Exception {
-		Mockito.when(vidValidator.validateId(Mockito.any())).thenReturn(false);
+		Mockito.lenient().when(vidValidator.validateId(Mockito.any())).thenReturn(false);
 		AuthUnLockRequestDTO authUnLockRequestDto = new AuthUnLockRequestDTO();
 		authUnLockRequestDto.setTransactionID("12345");
 		authUnLockRequestDto.setIndividualId("12345");

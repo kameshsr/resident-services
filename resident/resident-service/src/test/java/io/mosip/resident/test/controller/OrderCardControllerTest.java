@@ -1,41 +1,10 @@
 package io.mosip.resident.test.controller;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
-import javax.crypto.SecretKey;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.client.RestTemplate;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import io.mosip.kernel.core.crypto.spi.CryptoCoreSpec;
 import io.mosip.kernel.core.http.ResponseWrapper;
-import io.mosip.resident.controller.AuthTransactionCallbackController;
-import io.mosip.resident.controller.DocumentController;
-import io.mosip.resident.controller.IdAuthController;
-import io.mosip.resident.controller.IdentityController;
-import io.mosip.resident.controller.OrderCardController;
+import io.mosip.resident.controller.*;
 import io.mosip.resident.dto.RequestWrapper;
 import io.mosip.resident.dto.ResidentCredentialRequestDto;
 import io.mosip.resident.dto.ResidentCredentialResponseDto;
@@ -44,13 +13,36 @@ import io.mosip.resident.service.OrderCardService;
 import io.mosip.resident.service.ResidentVidService;
 import io.mosip.resident.test.ResidentTestBootApplication;
 import io.mosip.resident.util.AuditUtil;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.RestTemplate;
+
+import javax.crypto.SecretKey;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Resident order card controller test class.
  * 
  * @author Ritik Jain
  */
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(classes = ResidentTestBootApplication.class)
 @AutoConfigureMockMvc
 public class OrderCardControllerTest {
@@ -58,35 +50,35 @@ public class OrderCardControllerTest {
 	@InjectMocks
 	private OrderCardController orderCardController;
 
-	@MockBean
+	@Mock
 	private OrderCardService orderCardService;
 
-	@MockBean
+	@Mock
 	private ResidentVidService vidService;
 
 	@Mock
 	private AuditUtil auditUtil;
 
-	@MockBean
+	@Mock
 	@Qualifier("selfTokenRestTemplate")
 	private RestTemplate residentRestTemplate;
 
-	@MockBean
+	@Mock
 	private AuthTransactionCallbackController authTransactionCallbackController;
 
-	@MockBean
+	@Mock
 	private DocumentController documentController;
 
-	@MockBean
+	@Mock
 	private IdAuthController idAuthController;
 
-	@MockBean
+	@Mock
 	private IdentityController identityController;
 
-	@MockBean
+	@Mock
 	private ObjectStoreHelper objectStore;
 
-	@MockBean
+	@Mock
 	private CryptoCoreSpec<byte[], byte[], SecretKey, PublicKey, PrivateKey, String> encryptor;
 
 	@Autowired
