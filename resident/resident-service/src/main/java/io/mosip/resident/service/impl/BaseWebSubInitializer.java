@@ -1,6 +1,8 @@
 package io.mosip.resident.service.impl;
 
 import io.mosip.kernel.core.logger.spi.Logger;
+import io.mosip.kernel.core.util.DateUtils;
+import io.mosip.kernel.core.websub.model.EventModel;
 import io.mosip.kernel.core.websub.spi.PublisherClient;
 import io.mosip.kernel.core.websub.spi.SubscriptionClient;
 import io.mosip.kernel.websub.api.model.SubscriptionChangeRequest;
@@ -13,15 +15,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class BaseWebSubInitializer implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final Logger logger = LoggerConfiguration.logConfig(BaseWebSubInitializer.class);
+    private static final String PUBLISHER_RESIDENT = "RESIDENT";
 
     @Autowired
     private ThreadPoolTaskScheduler taskScheduler;
@@ -71,8 +76,8 @@ public class BaseWebSubInitializer implements ApplicationListener<ApplicationRea
         taskScheduler.schedule(() -> {
             //Invoke topic registrations. This is done only once.
             //Note: With authenticated websub, only register topics which are only published by IDA
-            tryRegisterTopicEvent(topic);
-            tryRegisterTopicEvent(authTransactionTopic);
+            tryRegisterTopicEvent(topic, createEventModel(topic) , publishUrl);
+            tryRegisterTopicEvent(authTransactionTopic, createEventModel(authTransactionTopic), publishUrl);
             //Init topic subscriptions
             initSubsriptions();
             authTransactionSubscription();
@@ -80,15 +85,31 @@ public class BaseWebSubInitializer implements ApplicationListener<ApplicationRea
 
     }
 
+    public  io.mosip.kernel.core.websub.model.EventModel createEventModel(String topic) {
+        io.mosip.kernel.core.websub.model.Event event = new io.mosip.kernel.core.websub.model.Event();
+        String dateTime = DateUtils.formatToISOString(DateUtils.getUTCCurrentDateTime());
+        event.setTimestamp(dateTime);
+        String eventId = UUID.randomUUID().toString();
+        event.setId(eventId);
+
+        io.mosip.kernel.core.websub.model.EventModel eventModel = new io.mosip.kernel.core.websub.model.EventModel();
+        eventModel.setEvent(event);
+        eventModel.setPublisher(PUBLISHER_RESIDENT);
+        eventModel.setPublishedOn(DateUtils.formatToISOString(DateUtils.getUTCCurrentDateTime()));
+        eventModel.setTopic(topic);
+        return eventModel;
+    }
+
     public void authTransactionSubscription() {
         subscribe(authTransactionTopic, callbackAuthTransactionUrl, authTransactionSecret, hubUrl);
     }
 
-    protected void tryRegisterTopicEvent(String eventTopic) {
+    protected void tryRegisterTopicEvent(String eventTopic, EventModel eventModel, String publisherUrl) {
         try {
             logger.debug(this.getClass().getCanonicalName(), "tryRegisterTopicEvent", "",
                     "Trying to register topic: " + eventTopic);
             publisher.registerTopic(eventTopic, publishUrl);
+            publisher.publishUpdate(eventTopic, eventModel, MediaType.APPLICATION_JSON_VALUE, null, publisherUrl);
             logger.info(this.getClass().getCanonicalName(), "tryRegisterTopicEvent", "",
                     "Registered topic: " + eventTopic);
         } catch (Exception e) {

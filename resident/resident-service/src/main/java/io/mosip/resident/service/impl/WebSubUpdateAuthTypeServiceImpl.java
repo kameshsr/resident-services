@@ -81,9 +81,6 @@ public class WebSubUpdateAuthTypeServiceImpl implements WebSubUpdateAuthTypeServ
         auditUtil.setAuditRequestDto(EventEnum.UPDATE_AUTH_TYPE_STATUS);
         try{
             logger.info( "WebSubUpdateAuthTypeServiceImpl::updateAuthTypeStatus()::partnerId");
-
-            publisher.publishUpdate(topic, eventModel, MediaType.APPLICATION_JSON_VALUE, null, publishUrl);
-
             SubscriptionChangeRequest subscriptionRequest = new SubscriptionChangeRequest();
             logger.info(callbackUrl, "", "", "WebSubUpdateAuthTypeServiceImpl::updateAuthTypeStatus()::callbackUrl");
             subscriptionRequest.setCallbackURL(callbackUrl);
