@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author Kamesh Shekhar Prasad
+ * This class is used to return response of payment.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
