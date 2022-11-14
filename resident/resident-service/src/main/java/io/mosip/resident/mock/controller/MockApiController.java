@@ -64,7 +64,7 @@ public class MockApiController {
 			@ApiResponse(responseCode = "402", description = "Payment Required", content = @Content(schema = @Schema(hidden = true))),
 			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(hidden = true))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(hidden = true))) })
-	public ResponseEntity<Object> getOrderStatus(@RequestParam("transactionId") String transactionId,
+	public ResponseEntity<?> getOrderStatus(@RequestParam("transactionId") String transactionId,
 																	 @RequestParam("individualId") String individualId) throws ResidentServiceCheckedException{
 		int lastDigit = Character.getNumericValue(transactionId.charAt(transactionId.length() - 1));
 		ResponseWrapper<PaymentSuccessResponseDto> responseWrapper = new ResponseWrapper<>();
