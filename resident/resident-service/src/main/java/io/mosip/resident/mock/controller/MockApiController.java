@@ -8,6 +8,7 @@ import io.mosip.resident.config.LoggerConfiguration;
 import io.mosip.resident.constant.ResidentErrorCode;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.mock.dto.PaymentSuccessResponseDto;
+import io.mosip.resident.mock.exception.PaymentFailedException;
 import io.mosip.resident.mock.service.MockService;
 import io.mosip.resident.util.AuditUtil;
 import io.mosip.resident.util.EventEnum;
@@ -75,9 +76,7 @@ public class MockApiController {
 				responseWrapper.setResponse(paymentSuccessResponseDto);
 				return ResponseEntity.ok().body(responseWrapper);
 			} else if (lastDigit == 6) {
-				responseWrapper.setErrors(List.of(new ServiceError(ResidentErrorCode.PAYMENT_FAILED.getErrorCode(),
-						ResidentErrorCode.PAYMENT_FAILED.getErrorMessage())));
-				return ResponseEntity.status(402).body(responseWrapper);
+				throw new PaymentFailedException();
 			}
 			else if (lastDigit == 7) {
 				responseWrapper.setErrors(List.of(new ServiceError(ResidentErrorCode.PAYMENT_CANCELED.getErrorCode(),

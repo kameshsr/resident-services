@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import io.mosip.resident.mock.exception.PaymentFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -139,6 +140,14 @@ public class ApiExceptionHandler {
 		ExceptionUtils.logRootCause(e);
 		logStackTrace(e);
 		return getErrorResponseEntity(httpServletRequest, e, HttpStatus.OK);
+	}
+
+	@ExceptionHandler(PaymentFailedException.class)
+	public ResponseEntity<ResponseWrapper<ServiceError>> controlRequestException(HttpServletRequest httpServletRequest,
+																				 final PaymentFailedException e) throws IOException{
+		ExceptionUtils.logRootCause(e);
+		logStackTrace(e);
+		return getErrorResponseEntity(httpServletRequest, e, HttpStatus.PAYMENT_REQUIRED);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
