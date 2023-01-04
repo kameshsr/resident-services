@@ -1,7 +1,5 @@
 package io.mosip.resident.exception;
 
-import static io.mosip.resident.constant.ResidentConstants.CHECK_STATUS_ID;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -49,6 +47,8 @@ import io.mosip.resident.mock.exception.PaymentCanceledException;
 import io.mosip.resident.mock.exception.PaymentFailedException;
 import io.mosip.resident.mock.exception.TechnicalErrorException;
 import io.mosip.resident.util.ObjectWithMetadata;
+
+import static io.mosip.resident.constant.ResidentConstants.CHECK_STATUS_ID;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
