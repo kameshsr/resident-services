@@ -59,6 +59,7 @@ import io.mosip.resident.exception.OtpValidationFailedException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.repository.ResidentTransactionRepository;
 import io.mosip.resident.service.IdAuthService;
+import io.mosip.resident.service.NotificationService;
 import io.mosip.resident.service.ProxyIdRepoService;
 import io.mosip.resident.service.impl.IdAuthServiceImpl;
 import io.mosip.resident.service.impl.IdentityServiceImpl;
@@ -101,6 +102,9 @@ public class IdAuthServiceTest {
     @Mock
     private IdentityServiceImpl identityService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @Before
     public void setup() {
 
@@ -134,7 +138,7 @@ public class IdAuthServiceTest {
     }
 
     @Test(expected = CertificateException.class)
-    public void validateOtpSuccessThrowsAPIsResourceAccessExceptionTest() throws IOException, ApisResourceAccessException, OtpValidationFailedException {
+    public void validateOtpSuccessThrowsAPIsResourceAccessExceptionTest() throws IOException, ApisResourceAccessException, OtpValidationFailedException, ResidentServiceCheckedException {
         String transactionID = "12345";
         String individualId = "individual";
         String individualIdType = IdType.UIN.name();
@@ -166,7 +170,7 @@ public class IdAuthServiceTest {
     }
 
     @Test
-    public void validateOtpSuccessTest() throws IOException, ApisResourceAccessException, OtpValidationFailedException {
+    public void validateOtpSuccessTest() throws IOException, ApisResourceAccessException, OtpValidationFailedException, ResidentServiceCheckedException {
         String transactionID = "12345";
         String individualId = "individual";
         String individualIdType = IdType.UIN.name();
@@ -222,7 +226,7 @@ public class IdAuthServiceTest {
         when(encryptor.asymmetricEncrypt(any(), any())).thenReturn(request.getBytes());
 
         when(restClient.postApi(any(), any(), any(), any(Class.class))).thenReturn(response);
-        when(identityService.getIDAToken(anyString())).thenReturn("346697314566835424394775924659202696");
+        when(identityService.getIDATokenForIndividualId(anyString())).thenReturn("346697314566835424394775924659202696");
 		when(residentTransactionRepository.findTopByRequestTrnIdAndTokenIdAndStatusCodeOrderByCrDtimesDesc(anyString(),
 				anyString(), anyString())).thenReturn(residentTransactionEntity);
 
@@ -233,7 +237,7 @@ public class IdAuthServiceTest {
 
     @Test(expected = OtpValidationFailedException.class)
     public void otpValidationFailedTest()
-            throws IOException, ApisResourceAccessException, OtpValidationFailedException {
+            throws IOException, ApisResourceAccessException, OtpValidationFailedException, ResidentServiceCheckedException {
         String transactionID = "12345";
         String individualId = "individual";
         String otp = "12345";
@@ -292,7 +296,7 @@ public class IdAuthServiceTest {
     }
 
     @Test(expected = Exception.class)
-    public void idAuthErrorsTest() throws IOException, ApisResourceAccessException, OtpValidationFailedException {
+    public void idAuthErrorsTest() throws IOException, ApisResourceAccessException, OtpValidationFailedException, ResidentServiceCheckedException {
         String transactionID = "12345";
         String individualId = "individual";
         String individualIdType = IdType.UIN.name();

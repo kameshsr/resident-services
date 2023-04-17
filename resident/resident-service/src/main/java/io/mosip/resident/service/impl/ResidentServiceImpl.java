@@ -1,17 +1,69 @@
 package io.mosip.resident.service.impl;
 
+import static io.mosip.resident.constant.EventStatusSuccess.CARD_DOWNLOADED;
+import static io.mosip.resident.constant.EventStatusSuccess.LOCKED;
+import static io.mosip.resident.constant.EventStatusSuccess.UNLOCKED;
+import static io.mosip.resident.constant.MappingJsonConstants.IDSCHEMA_VERSION;
+import static io.mosip.resident.constant.RegistrationConstants.UIN_LABEL;
+import static io.mosip.resident.constant.ResidentConstants.ATTRIBUTE_LIST_DELIMITER;
+import static io.mosip.resident.constant.ResidentConstants.RESIDENT;
+import static io.mosip.resident.constant.ResidentConstants.RESIDENT_NOTIFICATIONS_DEFAULT_PAGE_SIZE;
+import static io.mosip.resident.constant.ResidentErrorCode.MACHINE_MASTER_CREATE_EXCEPTION;
+import static io.mosip.resident.constant.ResidentErrorCode.PACKET_SIGNKEY_EXCEPTION;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.math.BigInteger;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.mosip.commons.khazana.exception.ObjectStoreAdapterException;
 import io.mosip.kernel.core.exception.BaseCheckedException;
 import io.mosip.kernel.core.http.ResponseWrapper;
+import io.mosip.kernel.core.idobjectvalidator.exception.IdObjectValidationFailedException;
+import io.mosip.kernel.core.idobjectvalidator.spi.IdObjectValidator;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.templatemanager.spi.TemplateManager;
 import io.mosip.kernel.core.templatemanager.spi.TemplateManagerBuilder;
 import io.mosip.kernel.core.util.CryptoUtil;
 import io.mosip.kernel.core.util.DateUtils;
-import io.mosip.kernel.core.idobjectvalidator.exception.IdObjectValidationFailedException;
-import io.mosip.kernel.core.idobjectvalidator.spi.IdObjectValidator;
 import io.mosip.resident.config.LoggerConfiguration;
 import io.mosip.resident.constant.ApiName;
 import io.mosip.resident.constant.AuthTypeStatus;
@@ -81,7 +133,6 @@ import io.mosip.resident.entity.ResidentTransactionEntity;
 import io.mosip.resident.entity.ResidentUserEntity;
 import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.CardNotReadyException;
-import io.mosip.resident.exception.EidNotBelongToSessionException;
 import io.mosip.resident.exception.EventIdNotPresentException;
 import io.mosip.resident.exception.InvalidRequestTypeCodeException;
 import io.mosip.resident.exception.OtpValidationFailedException;
@@ -110,57 +161,8 @@ import io.mosip.resident.util.TemplateUtil;
 import io.mosip.resident.util.UINCardDownloadService;
 import io.mosip.resident.util.Utilities;
 import io.mosip.resident.util.Utility;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.math.BigInteger;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static io.mosip.resident.constant.EventStatusSuccess.CARD_DOWNLOADED;
-import static io.mosip.resident.constant.EventStatusSuccess.LOCKED;
-import static io.mosip.resident.constant.EventStatusSuccess.UNLOCKED;
-import static io.mosip.resident.constant.ResidentConstants.RESIDENT;
-import static io.mosip.resident.constant.ResidentErrorCode.MACHINE_MASTER_CREATE_EXCEPTION;
-import static io.mosip.resident.constant.ResidentErrorCode.PACKET_SIGNKEY_EXCEPTION;
 
 @Service
 public class ResidentServiceImpl implements ResidentService {
@@ -187,14 +189,10 @@ public class ResidentServiceImpl implements ResidentService {
 	private static final Logger logger = LoggerConfiguration.logConfig(ResidentServiceImpl.class);
 	private static final Integer DEFAULT_PAGE_START = 0;
 	private static final Integer DEFAULT_PAGE_COUNT = 10;
-	private static final String AVAILABLE = "AVAILABLE";
 	private static final String CLASSPATH = "classpath";
 	private static final String ENCODE_TYPE = "UTF-8";
 	private static final String UPDATED = " updated";
 	private static final String ALL = "ALL";
-	private static final String CREATED_DATE_TIME = "crDtimes";
-	private static final String PINNED_STATUS = "pinnedStatus";
-	private static final String MODULO_OPERATOR = "%";
 	private static String cardType = "UIN";
 
 	@Autowired
@@ -287,9 +285,6 @@ public class ResidentServiceImpl implements ResidentService {
 
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	@Autowired
-	private ResidentCredentialServiceImpl residentCredentialServiceImpl;
 
 	@Autowired
 	private ResidentUserRepository residentUserRepository;
@@ -912,7 +907,8 @@ public class ResidentServiceImpl implements ResidentService {
 
 			if(validateIdObject) {
 				JSONObject obj = utilities.retrieveIdrepoJson(dto.getIndividualId());
-				Double idSchemaVersion = (Double) obj.get("IDSchemaVersion");
+				String idSchemaVersionStr = String.valueOf(obj.get("IDSchemaVersion"));
+				Double idSchemaVersion = Double.parseDouble(idSchemaVersionStr);
 				ResponseWrapper<?> idSchemaResponse = proxyMasterdataService.getLatestIdSchema(idSchemaVersion, null, null);
 				Object idSchema = idSchemaResponse.getResponse();
 				Map<String, ?> map = objectMapper.convertValue(idSchema, Map.class);
@@ -1166,10 +1162,10 @@ public class ResidentServiceImpl implements ResidentService {
 		} else {
 			identityMap = dto.getIdentity();
 		}
-		HashSet<String> keys = new HashSet<String>(identityMap.keySet());
-		keys.remove("IDSchemaVersion");
-		keys.remove("UIN");
-		String attributeList = keys.stream().collect(Collectors.joining(AUTH_TYPE_LIST_DELIMITER));
+		
+		String attributeList = identityMap.keySet().stream()
+				.filter(key -> !key.equals(IDSCHEMA_VERSION) && !key.equals(UIN_LABEL))
+				.collect(Collectors.joining(ATTRIBUTE_LIST_DELIMITER));
 		residentTransactionEntity.setAttributeList(attributeList);
 		residentTransactionEntity.setConsent(dto.getConsent());
 		residentTransactionEntity.setStatusCode(EventStatusInProgress.NEW.name());
@@ -1568,30 +1564,38 @@ public class ResidentServiceImpl implements ResidentService {
 	
 	@Override
 	public ResponseWrapper<PageDto<ServiceHistoryResponseDto>> getServiceHistory(Integer pageStart, Integer pageFetch,
+			 LocalDate fromDateTime, LocalDate toDateTime, String serviceType, String sortType,
+			 String statusFilter, String searchText, String langCode, int timeZoneOffset)
+		throws ResidentServiceCheckedException, ApisResourceAccessException {
+				return getServiceHistory(pageStart, pageFetch, fromDateTime, toDateTime, serviceType, sortType, statusFilter,
+						searchText, langCode, timeZoneOffset, null);
+	}
+	
+	@Override
+	public ResponseWrapper<PageDto<ServiceHistoryResponseDto>> getServiceHistory(Integer pageStart, Integer pageFetch,
 																				 LocalDate fromDateTime, LocalDate toDateTime, String serviceType, String sortType,
-																				 String statusFilter, String searchText, String langCode, int timeZoneOffset)
+																				 String statusFilter, String searchText, String langCode, int timeZoneOffset,
+																				 String defaultPageSizeProperty)
 			throws ResidentServiceCheckedException, ApisResourceAccessException {
 
 		if (pageStart == null) {
-			if (pageFetch == null) {
-				// If both Page start and page fetch values are null return all records
-				pageStart = DEFAULT_PAGE_START;
-				pageFetch = DEFAULT_PAGE_COUNT;
-			} else {
-				pageStart = DEFAULT_PAGE_START;
-			}
-		} else {
-			if (pageFetch == null) {
-				pageFetch = DEFAULT_PAGE_COUNT;
-			}
+			//By default page start is 0
+			pageStart = DEFAULT_PAGE_START;
 		}
+		
+		if (pageFetch == null) {
+			// Get the default page size based on the property if mentioned otherwise it
+			// default would be 10
+			pageFetch = getDefaultPageSize(defaultPageSizeProperty);
+		}
+		
 		if (pageStart < 0) {
 			audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.INVALID_PAGE_START_VALUE,
 					pageStart.toString(), "Invalid page start value"));
 			throw new ResidentServiceCheckedException(ResidentErrorCode.INVALID_PAGE_START_VALUE);
-		} else if (pageFetch < 0) {
+		} else if(pageFetch <=0){
 			audit.setAuditRequestDto(EventEnum.getEventEnumWithValue(EventEnum.INVALID_PAGE_FETCH_VALUE,
-					pageFetch.toString(), "Invalid page fetch value"));
+					pageFetch.toString(), "Invalid Page fetch value"));
 			throw new ResidentServiceCheckedException(ResidentErrorCode.INVALID_PAGE_FETCH_VALUE);
 		}
 
@@ -1599,6 +1603,12 @@ public class ResidentServiceImpl implements ResidentService {
 				sortType, pageStart, pageFetch, fromDateTime, toDateTime, serviceType, statusFilter, searchText,
 				langCode, timeZoneOffset);
 		return serviceHistoryResponseDtoList;
+	}
+
+	private Integer getDefaultPageSize(String defaultPageSizeProperty) {
+		return defaultPageSizeProperty != null
+				? env.getProperty(defaultPageSizeProperty, Integer.class, DEFAULT_PAGE_COUNT)
+				: DEFAULT_PAGE_COUNT;
 	}
 
 	@Override
@@ -1685,7 +1695,7 @@ public class ResidentServiceImpl implements ResidentService {
 				searchText, fromDateTime, toDateTime, serviceType, langCode, timeZoneOffset));
 		responseWrapper.setId(serviceHistoryId);
 		responseWrapper.setVersion(serviceHistoryVersion);
-		responseWrapper.setResponsetime(LocalDateTime.now());
+		responseWrapper.setResponsetime(DateUtils.getUTCCurrentDateTime());
 
 		return responseWrapper;
 	}
@@ -1896,11 +1906,7 @@ public class ResidentServiceImpl implements ResidentService {
 			templateType = TemplateType.FAILURE;
 		}
 		String templateTypeCode = templateUtil.getPurposeTemplateTypeCode(requestType, templateType);
-		ResponseWrapper<?> proxyResponseWrapper = proxyMasterdataService
-				.getAllTemplateBylangCodeAndTemplateTypeCode(langCode, templateTypeCode);
-		Map<String, String> templateResponse = new LinkedHashMap<>(
-				(Map<String, String>) proxyResponseWrapper.getResponse());
-		String fileText = templateResponse.get(ResidentConstants.FILE_TEXT);
+		String fileText = templateUtil.getTemplateValueFromTemplateTypeCodeAndLangCode(langCode, templateTypeCode);
 		return replacePlaceholderValueInTemplate(fileText, eventId, requestType, langCode);
 	}
 
@@ -1914,11 +1920,8 @@ public class ResidentServiceImpl implements ResidentService {
 		if (statusCode.equalsIgnoreCase(EventStatus.SUCCESS.toString())) {
 			templateType = TemplateType.SUCCESS;
 			String templateTypeCode = templateUtil.getSummaryTemplateTypeCode(requestType, templateType);
-			ResponseWrapper<?> proxyResponseWrapper = proxyMasterdataService
-					.getAllTemplateBylangCodeAndTemplateTypeCode(langCode, templateTypeCode);
-			Map<String, String> templateResponse = new LinkedHashMap<>(
-					(Map<String, String>) proxyResponseWrapper.getResponse());
-			return replacePlaceholderValueInTemplate(templateResponse.get(ResidentConstants.FILE_TEXT), eventId, requestType, langCode);
+			String fileText = templateUtil.getTemplateValueFromTemplateTypeCodeAndLangCode(langCode, templateTypeCode);
+			return replacePlaceholderValueInTemplate(fileText, eventId, requestType, langCode);
 		} else {
 			return getDescriptionForLangCode(langCode, statusCode, requestType, eventId);
 		}
@@ -2011,7 +2014,7 @@ public class ResidentServiceImpl implements ResidentService {
 			if (residentTransactionEntity.isPresent()) {
 				String idaToken = identityServiceImpl.getResidentIdaToken();
 				if (!idaToken.equals(residentTransactionEntity.get().getTokenId())) {
-					throw new EidNotBelongToSessionException();
+					throw new ResidentServiceCheckedException(ResidentErrorCode.EID_NOT_BELONG_TO_SESSION);
 				}
 				residentTransactionRepository.updateReadStatus(eventId);
 				requestTypeCode = residentTransactionEntity.get().getRequestTypeCode();
@@ -2048,6 +2051,8 @@ public class ResidentServiceImpl implements ResidentService {
 
 			String name = identityServiceImpl.getClaimValue(env.getProperty(ResidentConstants.NAME_FROM_PROFILE));
 			eventStatusMap.put(env.getProperty(ResidentConstants.APPLICANT_NAME_PROPERTY), name);
+			String authenticationMode = identityServiceImpl.getResidentAuthenticationMode();
+			eventStatusMap.put(env.getProperty(ResidentConstants.AUTHENTICATION_MODE_PROPERTY), authenticationMode);
 
 			if (serviceType.isPresent()) {
 				if (!serviceType.get().equals(ServiceType.ALL.name())) {
@@ -2078,19 +2083,22 @@ public class ResidentServiceImpl implements ResidentService {
 	public ResponseWrapper<UnreadNotificationDto> getnotificationCount(String idaToken) throws ApisResourceAccessException, ResidentServiceCheckedException {
 		ResponseWrapper<UnreadNotificationDto> responseWrapper = new ResponseWrapper<>();
 		LocalDateTime time = null;
-		Long residentTransactionEntity;
+		Long countOfUnreadNotifications;
 		Optional<ResidentUserEntity> residentUserEntity = residentUserRepository.findById(idaToken);
 		List<String> asyncRequestTypes = getAsyncRequestTypes();
 		if (residentUserEntity.isPresent()) {
+			//Get the last bell notification click time
 			time = residentUserEntity.get().getLastbellnotifDtimes();
-			residentTransactionEntity = residentTransactionRepository
-					.countByIdAndUnreadStatusForRequestTypesAfterNotificationClick(idaToken, time, asyncRequestTypes);
+			//Get count of unread events after bell notification click time
+			countOfUnreadNotifications = residentTransactionRepository
+					.countByIdAndUnreadStatusForRequestTypesAfterNotificationClick(idaToken, time, asyncRequestTypes, onlineVerificationPartnerId);
 		} else {
-			residentTransactionEntity = residentTransactionRepository.countByIdAndUnreadStatusForRequestTypes(idaToken,
-					asyncRequestTypes);
+			//Get count of all unread events
+			countOfUnreadNotifications = residentTransactionRepository.countByIdAndUnreadStatusForRequestTypes(idaToken,
+					asyncRequestTypes, onlineVerificationPartnerId);
 		}
 		UnreadNotificationDto notification = new UnreadNotificationDto();
-		notification.setUnreadCount(residentTransactionEntity);
+		notification.setUnreadCount(countOfUnreadNotifications);
 		responseWrapper.setId(serviceEventId);
 		responseWrapper.setVersion(serviceEventVersion);
 		responseWrapper.setResponse(notification);
@@ -2137,7 +2145,7 @@ public class ResidentServiceImpl implements ResidentService {
 			Integer pageFetch, String id, String languageCode, int timeZoneOffset) throws ResidentServiceCheckedException, ApisResourceAccessException {
 		ResponseWrapper<PageDto<ServiceHistoryResponseDto>> responseWrapper = getServiceHistory(pageStart, pageFetch,
 																				 null, null, ServiceType.ASYNC.name(), null,
-																				 null, null, languageCode, timeZoneOffset);
+																				 null, null, languageCode, timeZoneOffset, RESIDENT_NOTIFICATIONS_DEFAULT_PAGE_SIZE);
 		responseWrapper.setId(unreadnotificationlist);
 		responseWrapper.setVersion(serviceEventVersion);
 		return responseWrapper;
@@ -2158,7 +2166,7 @@ public class ResidentServiceImpl implements ResidentService {
 		logger.debug("template data from DB:" + proxyResponseWrapper.getResponse());
 		Map<String, Object> templateResponse = new LinkedHashMap<>(
 				(Map<String, Object>) proxyResponseWrapper.getResponse());
-		String fileText = (String) templateResponse.get("fileText");
+		String fileText = (String) templateResponse.get(ResidentConstants.FILE_TEXT);
 		// for avoiding null values in PDF
 		List<ServiceHistoryResponseDto> serviceHistoryDtlsList = responseWrapper.getResponse().getData();
 		if (serviceHistoryDtlsList != null && !serviceHistoryDtlsList.isEmpty()) {

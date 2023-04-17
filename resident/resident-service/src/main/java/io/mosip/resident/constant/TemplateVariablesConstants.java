@@ -6,6 +6,7 @@ package io.mosip.resident.constant;
  */
 public class TemplateVariablesConstants {
     public static final String EVENT_ID = "eventId";
+    public static final String FEATURE_NAME = "featureName";
     public static final String EVENT_TYPE = "eventType";
     public static final String PURPOSE = "purpose";
     public static final String DESCRIPTION = "description";
@@ -15,6 +16,7 @@ public class TemplateVariablesConstants {
     public static final String SUMMARY = "summary";
     public static final String TRACKING_ID = "trackingId";
     public static final String ORDER_TRACKING_LINK = "orderTrackingLink";
+    public static final String PARTNER_ID = "partner";
     public static final String PARTNER_NAME = "partnerName";
     public static final String PARTNER_LOGO = "partnerLogo";
     public static final String ATTRIBUTE_LIST = "attributeList";

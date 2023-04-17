@@ -3,6 +3,7 @@ package io.mosip.resident.util;
 import static io.mosip.resident.constant.MappingJsonConstants.EMAIL;
 import static io.mosip.resident.constant.MappingJsonConstants.PHONE;
 import static io.mosip.resident.constant.RegistrationConstants.DATETIME_PATTERN;
+import static io.mosip.resident.constant.ResidentConstants.RESIDENT_SERVICES;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,10 +24,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.assertj.core.util.Lists;
@@ -50,6 +53,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.util.IOUtils;
 
@@ -121,6 +125,7 @@ public class Utility {
 
 	private static final String IDENTITY = "identity";
 	private static final String VALUE = "value";
+	private static final String ACR_AMR = "acr_amr";
 	private static String regProcessorIdentityJson = "";
 
 	private static String ANONYMOUS_USER = "anonymousUser";
@@ -149,13 +154,43 @@ public class Utility {
 
 	@Autowired
 	private IdentityServiceImpl identityService;
+	
+	/** The acr-amr mapping json file. */
+	@Value("${amr-acr.json.filename}")
+	private String amrAcrJsonFile;
 
     @PostConstruct
     private void loadRegProcessorIdentityJson() {
         regProcessorIdentityJson = residentRestTemplate.getForObject(configServerFileStorageURL + residentIdentityJson, String.class);
         logger.info(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
                 LoggerFileConstant.APPLICATIONID.toString(), "loadRegProcessorIdentityJson completed successfully");
-    }
+	}
+
+	@Cacheable(value = "amr-acr-mapping")
+	public Map<String, String> getAmrAcrMapping() throws ResidentServiceCheckedException {
+		String amrAcrJson = residentRestTemplate.getForObject(configServerFileStorageURL + amrAcrJsonFile,
+				String.class);
+		Map<String, Object> amrAcrMap = Map.of();
+		try {
+			if (amrAcrJson != null) {
+				amrAcrMap = objectMapper.readValue(amrAcrJson.getBytes(StandardCharsets.UTF_8), Map.class);
+			}
+		} catch (IOException e) {
+			throw new ResidentServiceCheckedException(ResidentErrorCode.RESIDENT_SYS_EXCEPTION.getErrorCode(),
+					ResidentErrorCode.RESIDENT_SYS_EXCEPTION.getErrorMessage(), e);
+		}
+		Object obj = amrAcrMap.get(ACR_AMR);
+		Map<String, Object> map = (Map<String, Object>) obj;
+		Map<String, String> acrAmrMap = map.entrySet().stream().collect(
+				Collectors.toMap(entry -> entry.getKey(), entry -> (String) ((ArrayList) entry.getValue()).get(0)));
+		return acrAmrMap;
+	}
+
+	public String getAuthTypeCodefromkey(String reqTypeCode) throws ResidentServiceCheckedException {
+		Map<String, String> map = getAmrAcrMapping();
+		String authTypeCode = map.get(reqTypeCode);
+		return authTypeCode;
+	}
 
 	@SuppressWarnings("unchecked")
 	public JSONObject retrieveIdrepoJson(String id) throws ResidentServiceCheckedException {
@@ -390,8 +425,10 @@ public class Utility {
 		ResidentTransactionEntity residentTransactionEntity = new ResidentTransactionEntity();
 		residentTransactionEntity.setRequestDtimes(DateUtils.getUTCCurrentDateTime());
 		residentTransactionEntity.setResponseDtime(DateUtils.getUTCCurrentDateTime());
-		residentTransactionEntity.setCrBy("resident-services");
+		residentTransactionEntity.setCrBy(RESIDENT_SERVICES);
 		residentTransactionEntity.setCrDtimes(DateUtils.getUTCCurrentDateTime());
+		// Initialize with true, so that it is updated as false in later when needed for notification
+		residentTransactionEntity.setReadStatus(true);
 		return residentTransactionEntity;
 	}
 
@@ -503,31 +540,28 @@ public class Utility {
 		}
 		return HMACUtils2.digestAsPlainText(id.getBytes());
 	}
+	
+	public String getFileNameAck(String featureName, String eventId, String propertyName, int timeZoneOffset) {
+		if (eventId != null && propertyName.contains("{" + TemplateVariablesConstants.FEATURE_NAME + "}")) {
+			propertyName = propertyName.replace("{" + TemplateVariablesConstants.FEATURE_NAME + "}", featureName);
+		}
+		if (eventId != null && propertyName.contains("{" + TemplateVariablesConstants.EVENT_ID + "}")) {
+			propertyName = propertyName.replace("{" + TemplateVariablesConstants.EVENT_ID + "}", eventId);
+		}
+		if (propertyName.contains("{" + TemplateVariablesConstants.TIMESTAMP + "}")) {
+			propertyName = propertyName.replace("{" + TemplateVariablesConstants.TIMESTAMP + "}",
+					formatWithOffsetForFileName(timeZoneOffset, DateUtils.getUTCCurrentDateTime()));
+		}
+		return propertyName;
+	}
 
 	public String getFileNameAsPerFeatureName(String eventId, String featureName, int timeZoneOffset) {
-		if(featureName.equalsIgnoreCase(RequestType.SHARE_CRED_WITH_PARTNER.toString())){
-			return getFileName(eventId, Objects.requireNonNull(this.env.getProperty(
-					ResidentConstants.ACK_SHARE_CREDENTIAL_NAMING_CONVENTION_PROPERTY)), timeZoneOffset);
-		} else if(featureName.equalsIgnoreCase(RequestType.GENERATE_VID.toString())
-		|| featureName.equalsIgnoreCase(RequestType.REVOKE_VID.name())){
-			return getFileName(eventId, Objects.requireNonNull(this.env.getProperty(
-					ResidentConstants.ACK_MANAGE_MY_VID_NAMING_CONVENTION_PROPERTY)), timeZoneOffset);
-		} else if(featureName.equalsIgnoreCase(RequestType.ORDER_PHYSICAL_CARD.toString())){
-			return getFileName(eventId, Objects.requireNonNull(this.env.getProperty(
-					ResidentConstants.ACK_ORDER_PHYSICAL_CARD_NAMING_CONVENTION_PROPERTY)), timeZoneOffset);
-		} else if(featureName.equalsIgnoreCase(RequestType.DOWNLOAD_PERSONALIZED_CARD.toString())){
-			return getFileName(eventId, Objects.requireNonNull(this.env.getProperty(
-					ResidentConstants.ACK_PERSONALIZED_CARD_NAMING_CONVENTION_PROPERTY)), timeZoneOffset);
-		}else if(featureName.equalsIgnoreCase(RequestType.UPDATE_MY_UIN.toString())){
-			return getFileName(eventId, Objects.requireNonNull(this.env.getProperty(
-					ResidentConstants.ACK_UPDATE_MY_DATA_NAMING_CONVENTION_PROPERTY)), timeZoneOffset);
+		String namingProperty = RequestType.getRequestTypeByName(featureName).getNamingProperty();
+		if (namingProperty == null) {
+			namingProperty = ResidentConstants.ACK_NAMING_CONVENTION_PROPERTY;
 		}
-		else if(featureName.equalsIgnoreCase(RequestType.AUTH_TYPE_LOCK_UNLOCK.toString())){
-			return getFileName(eventId, Objects.requireNonNull(this.env.getProperty(
-					ResidentConstants.ACK_SECURE_MY_ID_NAMING_CONVENTION_PROPERTY)), timeZoneOffset);
-		}else {
-			return getFileName(eventId, Objects.requireNonNull(this.env.getProperty(ResidentConstants.ACK_NAMING_CONVENTION_PROPERTY)), timeZoneOffset);
-		}
+		return getFileNameAck(featureName, eventId, Objects.requireNonNull(this.env.getProperty(namingProperty)),
+				timeZoneOffset);
 	}
 	
 	public String getRefIdHash(String individualId) throws NoSuchAlgorithmException {
@@ -577,6 +611,21 @@ public class Utility {
 		}
 		logger.debug("Utilitiy::getClientIp()::exit - excecuted till end");
 		return req.getRemoteAddr();
+	}
+	
+	public String getCardOrderTrackingId(String transactionId, String individualId)
+			throws ResidentServiceCheckedException, ApisResourceAccessException {
+		Object object = residentServiceRestClient.getApi(ApiName.GET_ORDER_STATUS_URL, RequestType.getAllNewOrInprogressStatusList(env),
+				List.of(TemplateVariablesConstants.TRANSACTION_ID, TemplateVariablesConstants.INDIVIDUAL_ID),
+				List.of(transactionId, individualId), ResponseWrapper.class);
+		ResponseWrapper<Map<String, String>> responseWrapper = JsonUtil.convertValue(object,
+				new TypeReference<ResponseWrapper<Map<String, String>>>() {
+				});
+		if (Objects.nonNull(responseWrapper.getErrors()) && !responseWrapper.getErrors().isEmpty()) {
+			logger.error("ORDER_STATUS_URL returned error " + responseWrapper.getErrors());
+			throw new ResidentServiceCheckedException(ResidentErrorCode.UNKNOWN_EXCEPTION);
+		}
+		return responseWrapper.getResponse().get(TemplateVariablesConstants.TRACKING_ID);
 	}
 	
 }
