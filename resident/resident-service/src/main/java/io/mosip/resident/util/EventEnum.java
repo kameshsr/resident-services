@@ -679,30 +679,55 @@ public enum EventEnum {
 			"Resident service", "RS-VAL", "Validation", RegistrationConstants.RESIDENT_APPLICATION_ID,
 			RegistrationConstants.RESIDENT_APPLICATION_NAME),
 	DOWNLOAD_PERSONALIZED_CARD("RES-SER-268", RegistrationConstants.SYSTEM, "Download personalized card",
-			"Download card Html to pdf", "RES-SER",
-			"Resident service", "RS-DOWN_CARD", "Download card", RegistrationConstants.RESIDENT_APPLICATION_ID,
+			"Download card Html to pdf", "RES-SER", "Resident service", "RS-DOWN_CARD", "Download card",
+			RegistrationConstants.RESIDENT_APPLICATION_ID, RegistrationConstants.RESIDENT_APPLICATION_NAME),
+	DOWNLOAD_PERSONALIZED_CARD_FAILURE("RES-SER-291", RegistrationConstants.SYSTEM,
+			"Download personalized card: Failed", "Download card Html to pdf failed", "RES-SER", "Resident service",
+			"RS-DOWN_CARD", "Download card", RegistrationConstants.RESIDENT_APPLICATION_ID,
 			RegistrationConstants.RESIDENT_APPLICATION_NAME),
+	
 	DOWNLOAD_REGISTRATION_CENTER("RES-SER-269", RegistrationConstants.SYSTEM, "download registration center",
 			"download registration center", "RES-SER", "Residence service", "RS-DOWN_CARD", "Download card",
 			RegistrationConstants.RESIDENT_APPLICATION_ID, RegistrationConstants.RESIDENT_APPLICATION_NAME),
-	
+
 	DOWNLOAD_REGISTRATION_CENTER_SUCCESS("RES-SER-270", RegistrationConstants.SYSTEM,
 			"download registration center: Success",
 			"download registration center success based on language code and hierarchy level", "RES-SER",
 			"Resident service", "RS-DOWN_CARD", "Download card", RegistrationConstants.RESIDENT_APPLICATION_ID,
 			RegistrationConstants.RESIDENT_APPLICATION_NAME),
-	
-	DOWNLOAD_SUPPORTING_DOCS("RES-SER-271", RegistrationConstants.SYSTEM, "download supporting docs",
-			"download supporting docs", "RES-SER", "Residence service", "RS-DOWN_CARD", "Download card",
+
+	DOWNLOAD_REGISTRATION_CENTER_FAILURE("RES-SER-295", RegistrationConstants.SYSTEM,
+			"Download registration center: Failed", "Download registration center is failed", "RES-SER",
+			"Resident service", "RS-DOWN_CARD", "Download card", RegistrationConstants.RESIDENT_APPLICATION_ID,
+			RegistrationConstants.RESIDENT_APPLICATION_NAME),
+
+	DOWNLOAD_SUPPORTING_DOCS("RES-SER-271", RegistrationConstants.SYSTEM, "Download supporting docs",
+			"Download supporting docs", "RES-SER", "Residence service", "RS-DOWN_CARD", "Download card",
 			RegistrationConstants.RESIDENT_APPLICATION_ID, RegistrationConstants.RESIDENT_APPLICATION_NAME),
 
-	DOWNLOAD_SUPPORTING_DOCS_SUCCESS("RES-SER-272", RegistrationConstants.SYSTEM, "download supporting docs: Success",
-			"download supporting docs success based on language code", "RES-SER", "Resident service", "RS-DOWN_CARD",
-			"Download card", RegistrationConstants.RESIDENT_APPLICATION_ID, RegistrationConstants.RESIDENT_APPLICATION_NAME),
+	DOWNLOAD_SUPPORTING_DOCS_SUCCESS("RES-SER-272", RegistrationConstants.SYSTEM, "Download supporting docs: Success",
+			"Download supporting docs success based on language code", "RES-SER", "Resident service", "RS-DOWN_CARD",
+			"Download card", RegistrationConstants.RESIDENT_APPLICATION_ID,
+			RegistrationConstants.RESIDENT_APPLICATION_NAME),
+
+	DOWNLOAD_SUPPORTING_DOCS_FAILURE("RES-SER-296", RegistrationConstants.SYSTEM, "Download supporting docs: Failed",
+			"Download supporting docs failed", "RES-SER", "Resident service", "RS-DOWN_CARD", "Download card",
+			RegistrationConstants.RESIDENT_APPLICATION_ID, RegistrationConstants.RESIDENT_APPLICATION_NAME),
+
+	DOWNLOAD_REGISTRATION_CENTER_NEAREST("RES-SER-297", RegistrationConstants.SYSTEM,
+			"Download nearest registration center",
+			"Download nearest registration center based on language code,longitude,latitude and distance", "RES-SER",
+			"Resident service", "RS-DOWN_CARD", "Download card", RegistrationConstants.RESIDENT_APPLICATION_ID,
+			RegistrationConstants.RESIDENT_APPLICATION_NAME),
 
 	DOWNLOAD_REGISTRATION_CENTER_NEAREST_SUCCESS("RES-SER-273", RegistrationConstants.SYSTEM,
-			"download registration center: Success",
-			"download registration center success based on language code,longitude,latitude and distance", "RES-SER",
+			"Download nearest registration center: Success",
+			"Download nearest registration center success based on language code,longitude,latitude and distance",
+			"RES-SER", "Resident service", "RS-DOWN_CARD", "Download card",
+			RegistrationConstants.RESIDENT_APPLICATION_ID, RegistrationConstants.RESIDENT_APPLICATION_NAME),
+
+	DOWNLOAD_REGISTRATION_CENTER_NEAREST_FAILURE("RES-SER-298", RegistrationConstants.SYSTEM,
+			"Download nearest registration center: Failed", "Download nearest registration center failed", "RES-SER",
 			"Resident service", "RS-DOWN_CARD", "Download card", RegistrationConstants.RESIDENT_APPLICATION_ID,
 			RegistrationConstants.RESIDENT_APPLICATION_NAME),
 
@@ -793,21 +818,31 @@ public enum EventEnum {
 			"Resident service", "RS-VAL", "Validate token", RegistrationConstants.RESIDENT_APPLICATION_ID,
 			RegistrationConstants.RESIDENT_APPLICATION_NAME),
 	
-	CREDENTIAL_STAUTS_UPDATE_CALL_BACK("RES-SER-289", RegistrationConstants.SYSTEM,
+	CREDENTIAL_STATUS_UPDATE_CALL_BACK("RES-SER-289", RegistrationConstants.SYSTEM,
 			"Request credential status update call back url",
 			"Requesting credential status update call back url for transaction id %s", "RES-SER", "Residence service",
 			"RS-CRED_STAT_UPD", "Credential status update", RegistrationConstants.RESIDENT_APPLICATION_ID,
 			RegistrationConstants.RESIDENT_APPLICATION_NAME),
-	CREDENTIAL_STAUTS_UPDATE_CALL_BACK_SUCCESS("RES-SER-289", RegistrationConstants.SYSTEM,
+	CREDENTIAL_STATUS_UPDATE_CALL_BACK_SUCCESS("RES-SER-299", RegistrationConstants.SYSTEM,
 			"Credential status update call back: Success",
 			"credential status update call back success for transaction id %s", "RES-SER", "Residence service",
 			"RS-CRED_STAT_UPD", "Credential status update", RegistrationConstants.RESIDENT_APPLICATION_ID,
 			RegistrationConstants.RESIDENT_APPLICATION_NAME),
-	CREDENTIAL_STAUTS_UPDATE_CALL_BACK_FAILURE("RES-SER-289", RegistrationConstants.SYSTEM,
+	CREDENTIAL_STATUS_UPDATE_CALL_BACK_FAILURE("RES-SER-300", RegistrationConstants.SYSTEM,
 			"Credential status update call back: Failed",
 			"credential status update call back failure for transaction id %s", "RES-SER", "Residence service",
 			"RS-CRED_STAT_UPD", "Credential status update", RegistrationConstants.RESIDENT_APPLICATION_ID,
 			RegistrationConstants.RESIDENT_APPLICATION_NAME),
+	
+	AID_STAGE("RES-SER-292", RegistrationConstants.SYSTEM, "Check AID stage status", "Check AID stage status",
+			"RES-SER", "Residence service", "RS-AID_STAGE", "AID stage", RegistrationConstants.RESIDENT_APPLICATION_ID,
+			RegistrationConstants.RESIDENT_APPLICATION_NAME),
+	AID_STAGE_SUCCESS("RES-SER-293", RegistrationConstants.SYSTEM, "Check AID stage status: Success",
+			"Check AID stage status is success", "RES-SER", "Residence service", "RS-AID_STAGE", "AID stage",
+			RegistrationConstants.RESIDENT_APPLICATION_ID, RegistrationConstants.RESIDENT_APPLICATION_NAME),
+	AID_STAGE_FAILURE("RES-SER-294", RegistrationConstants.SYSTEM, "Check AID stage status: Failed",
+			"Check AID stage status is failed", "RES-SER", "Residence service", "RS-AID_STAGE", "AID stage",
+			RegistrationConstants.RESIDENT_APPLICATION_ID, RegistrationConstants.RESIDENT_APPLICATION_NAME),
 	;
 	
 
@@ -820,31 +855,30 @@ public enum EventEnum {
 
 	private String description;
 
+	private String refId;
+
+	private String refIdType;
+
 	private String moduleId;
 
 	private String moduleName;
-
-	private String id;
-
-	private String idType;
 
 	private String applicationId;
 
 	private String applicationName;
 
-	private EventEnum(String eventId, String type, String name, String description, String moduleId, String moduleName,
-			String id, String idType, String applicationId, String applicationName) {
+	private EventEnum(String eventId, String type, String name, String description, String refId, String refIdType,
+			String moduleId, String moduleName, String applicationId, String applicationName) {
 		this.eventId = eventId;
 		this.type = type;
 		this.name = name;
 		this.description = description;
+		this.refId = refId;
+		this.refIdType = refIdType;
 		this.moduleId = moduleId;
 		this.moduleName = moduleName;
-		this.id = id;
-		this.idType = idType;
 		this.applicationId = applicationId;
 		this.applicationName = applicationName;
-
 	}
 
 	public String getEventId() {
@@ -871,12 +905,12 @@ public enum EventEnum {
 		return moduleName;
 	}
 
-	public String getId() {
-		return id;
+	public String getRefId() {
+		return refId;
 	}
 
-	public String getIdType() {
-		return idType;
+	public String getRefIdType() {
+		return refIdType;
 	}
 
 	public void setDescription(String des) {
@@ -888,7 +922,7 @@ public enum EventEnum {
 	}
 
 	public void setId(String id) {
-		this.id = id;
+		this.refId = id;
 	}
 
 	public void setName(String name) {
@@ -905,7 +939,7 @@ public enum EventEnum {
 
 	public static EventEnum getEventEnumWithValue(EventEnum e, String s) {
 		e.setDescription(String.format(e.getDescription(), s));
-		String id = e.getId();
+		String id = e.getRefId();
 		if (id!=null && id.equalsIgnoreCase("%s")){
 			e.setId(s);
 		}
@@ -918,7 +952,7 @@ public enum EventEnum {
 	 */
 	public static EventEnum getEventEnumWithValue(EventEnum e, String edescription, String ename) {
 		e.setDescription(String.format(e.getDescription(), edescription));
-		String id = e.getId();
+		String id = e.getRefId();
 		if (id!=null && id.equalsIgnoreCase("%s"))
 			e.setId(edescription);
 		e.setName(String.format(e.getName(), ename));
