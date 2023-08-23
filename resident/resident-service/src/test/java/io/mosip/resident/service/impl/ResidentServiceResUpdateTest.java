@@ -77,7 +77,7 @@ import io.mosip.resident.repository.ResidentTransactionRepository;
 import io.mosip.resident.service.DocumentService;
 import io.mosip.resident.service.IdAuthService;
 import io.mosip.resident.service.NotificationService;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import io.mosip.resident.util.Utilities;
 import io.mosip.resident.util.Utility;
@@ -127,7 +127,7 @@ public class ResidentServiceResUpdateTest {
 	private ObjectMapper objectMapper;
 	
 	@Mock
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 	
 	@Mock
 	private IdObjectValidator idObjectValidator;

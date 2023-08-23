@@ -37,7 +37,7 @@ import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
 import io.mosip.resident.handler.service.ResidentConfigService;
 import io.mosip.resident.repository.ResidentTransactionRepository;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.service.impl.IdentityServiceImpl;
 import io.mosip.resident.service.impl.ProxyPartnerManagementServiceImpl;
 import io.mosip.resident.service.impl.ResidentServiceImpl;
@@ -80,7 +80,7 @@ public class TemplateUtil {
 	Environment env;
 
 	@Autowired
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 
 	@Autowired
 	private ResidentConfigService residentConfigService;
@@ -96,7 +96,6 @@ public class TemplateUtil {
 	/**
 	 * Gets the ack template variables for authentication request.
 	 *
-	 * @param eventId the event id
 	 * @return the ack template variables for authentication request
 	 */
 

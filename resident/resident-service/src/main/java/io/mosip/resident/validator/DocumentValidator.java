@@ -32,7 +32,7 @@ import io.mosip.resident.constant.ResidentConstants;
 import io.mosip.resident.exception.InvalidInputException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 /**
  * It validates the request and scans the file for viruses
  * 
@@ -57,7 +57,7 @@ public class DocumentValidator implements Validator {
 	private RequestValidator requestValidator;
 
 	@Autowired
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 
 	@Value("${mosip.max.file.upload.size.in.bytes}")
 	private int maxFileUploadSize;

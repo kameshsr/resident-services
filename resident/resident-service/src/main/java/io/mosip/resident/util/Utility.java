@@ -40,7 +40,7 @@ import io.mosip.resident.exception.IdRepoAppException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
 import io.mosip.resident.helper.ObjectStoreHelper;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.service.ProxyPartnerManagementService;
 import io.mosip.resident.service.impl.IdentityServiceImpl;
 import org.apache.commons.codec.binary.Base64;
@@ -206,7 +206,7 @@ public class Utility {
 	private IdentityServiceImpl identityService;
 
 	@Autowired
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 
 	@Autowired
 	private ObjectMapper mapper;

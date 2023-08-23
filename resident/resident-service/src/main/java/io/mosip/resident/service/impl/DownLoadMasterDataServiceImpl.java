@@ -45,7 +45,7 @@ import io.mosip.resident.dto.WorkingDaysResponseDto;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
 import io.mosip.resident.service.DownLoadMasterDataService;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.util.TemplateUtil;
 import io.mosip.resident.util.Utility;
 
@@ -64,7 +64,7 @@ public class DownLoadMasterDataServiceImpl implements DownLoadMasterDataService 
 	Environment env;
 
 	@Autowired
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 
 	private TemplateManager templateManager;
 

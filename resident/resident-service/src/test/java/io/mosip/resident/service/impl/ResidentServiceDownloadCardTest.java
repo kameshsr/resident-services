@@ -54,7 +54,7 @@ import io.mosip.resident.helper.ObjectStoreHelper;
 import io.mosip.resident.repository.ResidentSessionRepository;
 import io.mosip.resident.repository.ResidentTransactionRepository;
 import io.mosip.resident.repository.ResidentUserRepository;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import io.mosip.resident.util.TemplateUtil;
 import io.mosip.resident.util.Utility;
@@ -101,7 +101,7 @@ public class ResidentServiceDownloadCardTest {
     private ResidentSessionRepository residentSessionRepository;
 
     @Mock
-    private ProxyMasterdataService proxyMasterdataService;
+    private ProxyMasterDataService proxyMasterdataService;
 
     @Mock
     private TemplateManager templateManager;

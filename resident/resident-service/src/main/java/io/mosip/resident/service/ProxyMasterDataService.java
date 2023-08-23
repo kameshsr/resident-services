@@ -18,7 +18,7 @@ import reactor.util.function.Tuple2;
  * @author Ritik Jain
  */
 @Service
-public interface ProxyMasterdataService {
+public interface ProxyMasterDataService {
 
 	/**
 	 * Get valid documents by language code.

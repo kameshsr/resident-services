@@ -23,7 +23,7 @@ import io.mosip.resident.entity.ResidentTransactionEntity;
 import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.repository.ResidentTransactionRepository;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.service.ResidentService;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import io.mosip.resident.util.TemplateUtil;
@@ -59,7 +59,7 @@ public class ResidentServiceGetEventStatusTest {
 	private ResidentServiceRestClient restClient;
     
     @Mock
-    private ProxyMasterdataService proxyMasterdataService;
+    private ProxyMasterDataService proxyMasterdataService;
 
     @Mock
     private Environment environment;

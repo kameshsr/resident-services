@@ -32,7 +32,7 @@ import io.mosip.resident.dto.DocumentRequestDTO;
 import io.mosip.resident.exception.InvalidInputException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import reactor.util.function.Tuples;
 
 /**
@@ -50,7 +50,7 @@ public class DocumentValidatorTest {
 	private RequestValidator requestValidator;
 
 	@Mock
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 
 	@Mock
 	private VirusScanner<Boolean, InputStream> virusScanner;

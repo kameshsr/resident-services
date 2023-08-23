@@ -33,7 +33,7 @@ import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.helper.ObjectStoreHelper;
 import io.mosip.resident.service.DocumentService;
 import io.mosip.resident.service.ProxyIdRepoService;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.service.ResidentVidService;
 import io.mosip.resident.service.impl.AcknowledgementServiceImpl;
 import io.mosip.resident.service.impl.ResidentServiceImpl;
@@ -54,7 +54,7 @@ public class ProxyMasterDataControllerTest {
     private ProxyIdRepoService proxyIdRepoService;
 
 	@MockBean
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 
 	@Mock
 	private AuditUtil auditUtil;
@@ -76,7 +76,7 @@ public class ProxyMasterDataControllerTest {
 	private CryptoCoreSpec<byte[], byte[], SecretKey, PublicKey, PrivateKey, String> encryptor;
 
 	@InjectMocks
-	private ProxyMasterdataController proxyMasterdataController;
+	private ProxyMasterDataController proxyMasterdataController;
 
 	@MockBean
 	private DocumentService docService;

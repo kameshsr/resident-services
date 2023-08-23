@@ -35,7 +35,7 @@ import io.mosip.resident.dto.TemplateResponseDto;
 import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import reactor.util.function.Tuple2;
 
@@ -56,7 +56,7 @@ public class ProxyMasterDataServiceTest {
 	private ResidentServiceRestClient residentServiceRestClient;
 
 	@InjectMocks
-	private ProxyMasterdataService proxyMasterdataService = new ProxyMasterdataServiceImpl();
+	private ProxyMasterDataService proxyMasterdataService = new ProxyMasterDataServiceImpl();
 
 	private ResponseWrapper responseWrapper;
 

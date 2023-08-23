@@ -35,7 +35,7 @@ import io.mosip.resident.dto.GenderTypeListDTO;
 import io.mosip.resident.dto.TemplateResponseDto;
 import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.util.JsonUtil;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import reactor.util.function.Tuple2;
@@ -47,7 +47,7 @@ import reactor.util.function.Tuples;
  * @author Ritik Jain
  */
 @Component
-public class ProxyMasterdataServiceImpl implements ProxyMasterdataService {
+public class ProxyMasterDataServiceImpl implements ProxyMasterDataService {
 
 	private static final String CODE = "code";
 
@@ -64,7 +64,7 @@ public class ProxyMasterdataServiceImpl implements ProxyMasterdataService {
 	@Autowired
 	Utility utility;
 
-	private static final Logger logger = LoggerConfiguration.logConfig(ProxyMasterdataServiceImpl.class);
+	private static final Logger logger = LoggerConfiguration.logConfig(ProxyMasterDataServiceImpl.class);
 
 	@Autowired
 	private Utilities utilities;

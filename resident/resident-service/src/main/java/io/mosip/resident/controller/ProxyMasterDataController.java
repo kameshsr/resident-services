@@ -17,7 +17,7 @@ import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.resident.config.LoggerConfiguration;
 import io.mosip.resident.constant.OrderEnum;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.util.AuditUtil;
 import io.mosip.resident.util.EventEnum;
 import io.swagger.annotations.ApiParam;
@@ -35,10 +35,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @RestController
 @Tag(name = "proxy-masterdata-controller", description = "Proxy Masterdata Controller")
-public class ProxyMasterdataController {
+public class ProxyMasterDataController {
 
 	@Autowired
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 
 	@Autowired
 	private AuditUtil auditUtil;
@@ -46,7 +46,7 @@ public class ProxyMasterdataController {
 	@Autowired
 	private Utility utility;
 
-	private static final Logger logger = LoggerConfiguration.logConfig(ProxyMasterdataController.class);
+	private static final Logger logger = LoggerConfiguration.logConfig(ProxyMasterDataController.class);
 
 	@Autowired
 	private Utilities utilities;

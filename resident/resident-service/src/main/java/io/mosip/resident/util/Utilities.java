@@ -26,7 +26,7 @@ import io.mosip.resident.exception.IndividualIdNotFoundException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.VidCreationException;
 import io.mosip.resident.service.IdentityService;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import lombok.Data;
 import org.assertj.core.util.Lists;
 import org.json.simple.JSONObject;
@@ -112,7 +112,7 @@ public class Utilities {
 	private ResidentServiceRestClient residentServiceRestClient;
 
 	@Autowired
-	private ProxyMasterdataService proxyMasterdataService;
+	private ProxyMasterDataService proxyMasterdataService;
 
 	@Autowired
 	private Utility utility;

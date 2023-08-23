@@ -32,7 +32,7 @@ import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.handler.service.ResidentConfigService;
 import io.mosip.resident.repository.ResidentTransactionRepository;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.service.impl.IdentityServiceImpl;
 import io.mosip.resident.service.impl.IdentityServiceTest;
 import io.mosip.resident.service.impl.ProxyPartnerManagementServiceImpl;
@@ -76,7 +76,7 @@ public class TemplateUtilTest {
     private ResidentConfigService residentConfigService;
 
     @Mock
-    private ProxyMasterdataService proxyMasterdataService;
+    private ProxyMasterDataService proxyMasterdataService;
 
     private String eventId;
     private ResidentTransactionEntity residentTransactionEntity;

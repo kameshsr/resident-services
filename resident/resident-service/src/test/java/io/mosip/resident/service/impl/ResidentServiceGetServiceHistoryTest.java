@@ -47,7 +47,7 @@ import io.mosip.resident.repository.ResidentSessionRepository;
 import io.mosip.resident.repository.ResidentTransactionRepository;
 import io.mosip.resident.service.IdAuthService;
 import io.mosip.resident.service.ProxyIdRepoService;
-import io.mosip.resident.service.ProxyMasterdataService;
+import io.mosip.resident.service.ProxyMasterDataService;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import io.mosip.resident.util.TemplateUtil;
 import io.mosip.resident.util.Utilities;
@@ -101,7 +101,7 @@ public class ResidentServiceGetServiceHistoryTest {
     private TemplateUtil templateUtil;
 
     @Mock
-    private ProxyMasterdataService proxyMasterdataService;
+    private ProxyMasterDataService proxyMasterdataService;
 
     @Mock
     private EntityManager entityManager;
