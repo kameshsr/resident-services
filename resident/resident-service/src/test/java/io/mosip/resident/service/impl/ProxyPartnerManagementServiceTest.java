@@ -2,15 +2,21 @@ package io.mosip.resident.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import io.mosip.resident.constant.ApiName;
 import io.mosip.resident.constant.ResidentErrorCode;
 import io.mosip.resident.util.Utility;
 import org.junit.Before;
@@ -67,14 +73,14 @@ public class ProxyPartnerManagementServiceTest {
 	public void testGetPartnersByPartnerType() throws ApisResourceAccessException, ResidentServiceCheckedException {
 		responseWrapper.setErrors(null);
 		ResponseWrapper<?> result = proxyPartnerManagementService
-				.getPartnersByPartnerType(Optional.of("Device_Provider"));
+				.getPartnersByPartnerType("Device_Provider");
 		assertNotNull(result);
 	}
 	
 	@Test
 	public void testGetPartnersByPartnerTypeIf() throws ApisResourceAccessException, ResidentServiceCheckedException {
 		ResponseWrapper<?> result = proxyPartnerManagementService
-				.getPartnersByPartnerType(Optional.empty());
+				.getPartnersByPartnerType("");
 		assertNotNull(result);
 	}
 
@@ -91,7 +97,7 @@ public class ProxyPartnerManagementServiceTest {
 				.thenThrow(new ResidentServiceCheckedException());
 
 		responseWrapper.setErrors(errorList);
-		proxyPartnerManagementService.getPartnersByPartnerType(Optional.of("Device_Provider"));
+		proxyPartnerManagementService.getPartnersByPartnerType("Device_Provider");
 	}
 
 	@Test(expected = ResidentServiceCheckedException.class)
@@ -99,20 +105,61 @@ public class ProxyPartnerManagementServiceTest {
 			throws ApisResourceAccessException, ResidentServiceCheckedException {
 		when(utility.getPartnersByPartnerType(any(), any()))
 				.thenThrow(new ResidentServiceCheckedException());
-		proxyPartnerManagementService.getPartnersByPartnerType(Optional.of("Device_Provider"));
+		proxyPartnerManagementService.getPartnersByPartnerType("Device_Provider");
 	}
 	
 	@Test
 	public void testGetPartnerDetailFromPartnerId() throws ResidentServiceCheckedException {
-		Map<String, ?> result = proxyPartnerManagementService.getPartnerDetailFromPartnerId("2345671");
+		Map<String, ?> result = proxyPartnerManagementService.getPartnerDetailFromPartnerIdAndPartnerType("2345671", "Auth");
 		assertEquals("2345671", result.get("partnerID"));
 	}
 
 	@Test(expected = ResidentServiceException.class)
 	public void testGetPartnerDetailFromPartnerIdException() throws ResidentServiceCheckedException, ApisResourceAccessException {
 		when(utility.getPartnersByPartnerType(any(), any()))
-				.thenThrow(new ResidentServiceException(ResidentErrorCode.PARTNER_SERVICE_EXCEPTION));
-		proxyPartnerManagementService.getPartnerDetailFromPartnerId("");
+				.thenThrow(new ResidentServiceCheckedException(ResidentErrorCode.PARTNER_SERVICE_EXCEPTION));
+		proxyPartnerManagementService.getPartnerDetailFromPartnerIdAndPartnerType("", "Auth");
+	}
+
+	@Test
+	public void testGetPartnersByPartnerTypeV2() throws ApisResourceAccessException, ResidentServiceCheckedException {
+		ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
+		responseWrapper.setErrors(new ArrayList<>());
+		responseWrapper.setId("https://example.org/example");
+		responseWrapper.setMetadata("Metadata");
+		responseWrapper.setResponse("Response");
+		responseWrapper.setResponsetime(LocalDateTime.of(1, 1, 1, 1, 1));
+		responseWrapper.setVersion("https://example.org/example");
+		when(residentServiceRestClient.getApi((ApiName) any(), (List<String>) any(), (List<String>) any(),
+				(List<Object>) any(), (Class<Object>) any())).thenReturn(responseWrapper);
+		assertSame(responseWrapper,
+				proxyPartnerManagementService.getPartnersByPartnerType(Optional.of("42"), ApiName.PARTNER_API_URL));
+		verify(residentServiceRestClient).getApi((ApiName) any(), (List<String>) any(), (List<String>) any(),
+				(List<Object>) any(), (Class<Object>) any());
+	}
+
+	@Test(expected = ResidentServiceCheckedException.class)
+	public void testGetPartnersByPartnerType3() throws ApisResourceAccessException, ResidentServiceCheckedException {
+		ResponseWrapper<Object> responseWrapper = (ResponseWrapper<Object>) mock(ResponseWrapper.class);
+		when(responseWrapper.getErrors()).thenReturn(List.of(new ServiceError(ResidentErrorCode.PARTNER_SERVICE_EXCEPTION.getErrorCode(),
+				ResidentErrorCode.PARTNER_SERVICE_EXCEPTION.getErrorMessage())));
+		when(residentServiceRestClient.getApi((ApiName) any(), (List<String>) any(), (List<String>) any(),
+				(List<Object>) any(), (Class<Object>) any())).thenReturn(responseWrapper);
+		proxyPartnerManagementService.getPartnersByPartnerType(Optional.of("42"), ApiName.PARTNER_API_URL);
+		verify(residentServiceRestClient).getApi((ApiName) any(), (List<String>) any(), (List<String>) any(),
+				(List<Object>) any(), (Class<Object>) any());
+		verify(responseWrapper, atLeast(1)).getErrors();
+	}
+
+	@Test(expected = ResidentServiceCheckedException.class)
+	public void testGetPartnersByPartnerType4() throws ApisResourceAccessException, ResidentServiceCheckedException {
+		ResponseWrapper<Object> responseWrapper = (ResponseWrapper<Object>) mock(ResponseWrapper.class);
+		when(residentServiceRestClient.getApi((ApiName) any(), (List<String>) any(), (List<String>) any(),
+				(List<Object>) any(), (Class<Object>) any())).thenThrow(new ApisResourceAccessException());
+		proxyPartnerManagementService.getPartnersByPartnerType(Optional.of("42"), ApiName.PARTNER_API_URL);
+		verify(residentServiceRestClient).getApi((ApiName) any(), (List<String>) any(), (List<String>) any(),
+				(List<Object>) any(), (Class<Object>) any());
+		verify(responseWrapper, atLeast(1)).getErrors();
 	}
 
 }
