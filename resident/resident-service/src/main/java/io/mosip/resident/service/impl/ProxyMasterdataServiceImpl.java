@@ -460,6 +460,40 @@ public class ProxyMasterdataServiceImpl implements ProxyMasterdataService {
 		}
 	}
 
+	@Override
+	@Cacheable(value = "getAllDynamicFieldByName", key = "#fieldName + '_' + #pageNumber + '_' + #pageSize + '_' + #lastUpdated")
+	public ResponseWrapper<?> getAllDynamicFieldByName(String fieldName, int pageNumber, int pageSize, String lastUpdated) throws ResidentServiceCheckedException {
+		logger.debug("ProxyMasterdataServiceImpl::getAllDynamicFieldByName()::entry");
+		ResponseWrapper<?> responseWrapper = new ResponseWrapper<>();
+		Map<String, String> pathsegments = new HashMap<String, String>();
+		pathsegments.put("fieldName", fieldName);
+		List<String> queryParamName = new ArrayList<String>();
+		List<Object> queryParamValue = new ArrayList<>();
+
+		queryParamName.add("pageNumber");
+		queryParamName.add("pageSize");
+		queryParamName.add("lastUpdated");
+		queryParamValue.add(pageNumber);
+		queryParamValue.add(pageSize);
+		queryParamValue.add(lastUpdated);
+
+		try {
+			responseWrapper = residentServiceRestClient.getApi(ApiName.DYNAMIC_FIELD_BASED_ON_FIELD_NAME, pathsegments, queryParamName,
+					queryParamValue, ResponseWrapper.class);
+			if (responseWrapper.getErrors() != null && !responseWrapper.getErrors().isEmpty()) {
+				logger.error(responseWrapper.getErrors().get(0).toString());
+				throw new ResidentServiceCheckedException(ResidentErrorCode.BAD_REQUEST.getErrorCode(),
+						responseWrapper.getErrors().get(0).getMessage());
+			}
+		} catch (ApisResourceAccessException | ResidentServiceCheckedException e) {
+			logger.error("Error occured in accessing dynamic data %s", e.getMessage());
+			throw new ResidentServiceCheckedException(ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
+					ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorMessage(), e);
+		}
+		logger.debug("ProxyMasterdataServiceImpl::getDynamicFieldBasedOnLangCodeAndFieldName()::exit");
+		return responseWrapper;
+	}
+
 	@CacheEvict(value = "templateCache", allEntries = true)
 	@Scheduled(fixedRateString = "${resident.cache.expiry.time.millisec.templateCache}")
 	public void emptyTemplateCache() {

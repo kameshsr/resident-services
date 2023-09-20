@@ -168,5 +168,6 @@ public interface ProxyMasterdataService {
 
 	String getTemplateValueFromTemplateTypeCodeAndLangCode(String languageCode, String templateTypeCode);
 
-	
+
+    ResponseWrapper<?> getAllDynamicFieldByName(String fieldName, int pageNumber, int pageSize, String lastUpdated) throws ResidentServiceCheckedException;
 }

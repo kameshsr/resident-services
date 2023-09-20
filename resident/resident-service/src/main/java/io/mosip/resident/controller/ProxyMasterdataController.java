@@ -4,10 +4,13 @@ import static io.mosip.resident.constant.ResidentConstants.API_RESPONSE_TIME_DES
 import static io.mosip.resident.constant.ResidentConstants.API_RESPONSE_TIME_ID;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import io.mosip.resident.util.Utilities;
 import io.mosip.resident.util.Utility;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -531,6 +534,27 @@ public class ProxyMasterdataController {
 		}
 		auditUtil.setAuditRequestDto(EventEnum.GET_GENDER_CODE_SUCCESS);
 		logger.debug("ProxyMasterdataController::getGenderCodeByGenderTypeAndLangCode::exit");
+		return responseWrapper;
+	}
+
+	@ResponseFilter
+	@GetMapping("/proxy/masterdata/dynamicfields/all/{fieldName}")
+	@ApiOperation(value = "Service to fetch all dynamic field value for all languages")
+	public ResponseWrapper<?> getAllDynamicFieldByName(
+			@PathVariable("fieldName") String fieldName,
+			@RequestParam(name = "pageNumber", defaultValue = "0") @ApiParam(value = "page number, sorted based on name", defaultValue = "0") int pageNumber,
+			@RequestParam(name = "pageSize", defaultValue = "10") @ApiParam(value = "page size", defaultValue = "10") int pageSize,
+			@RequestParam(name = "lastUpdated", required = false) @ApiParam(value = "last updated rows", required = false) String lastUpdated) throws ResidentServiceCheckedException {
+		logger.debug("ProxyMaster dataController::getAllDynamicFieldByName::entry");
+		ResponseWrapper<?> responseWrapper;
+		try {
+			responseWrapper = proxyMasterdataService.getAllDynamicFieldByName(fieldName, pageNumber, pageSize, lastUpdated);
+		} catch (ResidentServiceCheckedException e) {
+			auditUtil.setAuditRequestDto(EventEnum.GET_ALL_DYNAMIC_FIELD_VALUE_EXCEPTION);
+			throw e;
+		}
+		auditUtil.setAuditRequestDto(EventEnum.GET_ALL_DYNAMIC_FIELD_VALUE_SUCCESS);
+		logger.debug("ProxyMaster dataController::getAllDynamicFieldByName::exit");
 		return responseWrapper;
 	}
 
