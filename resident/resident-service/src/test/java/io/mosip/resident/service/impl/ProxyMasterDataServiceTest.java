@@ -723,4 +723,17 @@ public class ProxyMasterDataServiceTest {
 				(List<Object>) any(), (Class<Object>) any());
 		verify(responseWrapper, atLeast(1)).getErrors();
 	}
+
+	@Test
+	public void testGetAllDynamicFieldByName5() throws ApisResourceAccessException, ResidentServiceCheckedException {
+		ResponseWrapper<Object> responseWrapper = (ResponseWrapper<Object>) mock(ResponseWrapper.class);
+		when(responseWrapper.getErrors()).thenReturn(new ArrayList<>());
+		when(residentServiceRestClient.getApi((ApiName) any(), (Map<String, Object>) any(), (List<String>) any(),
+				(List<Object>) any(), (Class<Object>) any())).thenReturn(responseWrapper);
+		proxyMasterdataService.getAllDynamicFieldByName("Field Name", 10, 3, null);
+		verify(residentServiceRestClient).getApi((ApiName) any(), (Map<String, Object>) any(), (List<String>) any(),
+				(List<Object>) any(), (Class<Object>) any());
+		verify(responseWrapper, atLeast(1)).getErrors();
+	}
+
 }
