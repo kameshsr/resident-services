@@ -472,10 +472,13 @@ public class ProxyMasterdataServiceImpl implements ProxyMasterdataService {
 
 		queryParamName.add("pageNumber");
 		queryParamName.add("pageSize");
-		queryParamName.add("lastUpdated");
+
 		queryParamValue.add(pageNumber);
 		queryParamValue.add(pageSize);
-		queryParamValue.add(lastUpdated);
+		if(lastUpdated!=null){
+			queryParamName.add("lastUpdated");
+			queryParamValue.add(lastUpdated);
+		}
 
 		try {
 			responseWrapper = residentServiceRestClient.getApi(ApiName.DYNAMIC_FIELD_BASED_ON_FIELD_NAME, pathsegments, queryParamName,
