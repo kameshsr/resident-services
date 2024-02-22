@@ -10,4 +10,5 @@ public interface ProxyIdRepoService {
 	ResponseWrapper<?> getRemainingUpdateCountByIndividualId(List<String> attributeList)
 			throws ResidentServiceCheckedException;
 
+    ResponseWrapper<?> discardDraft(String aid) throws ResidentServiceCheckedException;
 }

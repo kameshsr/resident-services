@@ -11,6 +11,7 @@ import io.mosip.resident.service.ProxyIdRepoService;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 	private static final Logger logger = LoggerConfiguration.logConfig(ProxyIdRepoServiceImpl.class);
 	private static final String NO_RECORDS_FOUND_ID_REPO_ERROR_CODE = "IDR-IDC-007";
 	private static final int ZERO = 0;
+	private static final String REGISTRATION_ID = "registrationId";
 
 	@Autowired
 	private ResidentServiceRestClient residentServiceRestClient;
@@ -69,6 +71,33 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 			logger.debug("ProxyIdRepoServiceImpl::getRemainingUpdateCountByIndividualId()::exit");
 			return responseWrapper;
 			
+		} catch (ApisResourceAccessException e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+			throw new ResidentServiceCheckedException(API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
+					API_RESOURCE_ACCESS_EXCEPTION.getErrorMessage(), e);
+		}
+	}
+
+	@Override
+	public ResponseWrapper<?> discardDraft(String aid) throws ResidentServiceCheckedException{
+		try {
+			logger.debug("ProxyIdRepoServiceImpl::discardDraft()::entry");
+			Map<String, Object> pathsegements = new HashMap<String, Object>();
+			pathsegements.put(REGISTRATION_ID, aid);
+			ResponseWrapper<?> responseWrapper = residentServiceRestClient.postApi(ApiName.IDREPO_IDENTITY_DISCARD_DRAFT.name(),
+					MediaType.APPLICATION_JSON, pathsegements, ResponseWrapper.class);
+			if (responseWrapper.getErrors() != null && !responseWrapper.getErrors().isEmpty()){
+				if(responseWrapper.getErrors().get(ZERO) != null && !responseWrapper.getErrors().get(ZERO).toString().isEmpty() &&
+						responseWrapper.getErrors().get(ZERO).getErrorCode() != null &&
+						!responseWrapper.getErrors().get(ZERO).getErrorCode().isEmpty()) {
+					throw new ResidentServiceCheckedException(ResidentErrorCode.NO_RECORDS_FOUND);
+				}else {
+					throw new ResidentServiceCheckedException(ResidentErrorCode.UNKNOWN_EXCEPTION);
+				}
+			}
+			logger.debug("ProxyIdRepoServiceImpl::discardDraft()::exit");
+			return responseWrapper;
+
 		} catch (ApisResourceAccessException e) {
 			logger.error(ExceptionUtils.getStackTrace(e));
 			throw new ResidentServiceCheckedException(API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),

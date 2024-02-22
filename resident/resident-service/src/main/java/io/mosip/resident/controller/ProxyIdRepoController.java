@@ -12,7 +12,10 @@ import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,6 +73,34 @@ public class ProxyIdRepoController {
 					.getRemainingUpdateCountByIndividualId(filterAttributeList);
 			auditUtil.setAuditRequestDto(GET_IDENTITY_UPDATE_COUNT_SUCCESS);
 			logger.debug("ProxyIdRepoController::getRemainingUpdateCountByIndividualId()::exit");
+			return ResponseEntity.ok(responseWrapper);
+		} catch (ResidentServiceCheckedException e) {
+			auditUtil.setAuditRequestDto(GET_IDENTITY_UPDATE_COUNT_EXCEPTION);
+			ExceptionUtils.logRootCause(e);
+			ResponseWrapper<?> responseWrapper = new ResponseWrapper<>();
+			responseWrapper.setErrors(List.of(new ServiceError(e.getErrorCode(), e.getErrorText())));
+			return ResponseEntity.ok(responseWrapper);
+		}
+	}
+
+	@Timed(value=API_RESPONSE_TIME_ID,description=API_RESPONSE_TIME_DESCRIPTION, percentiles = {0.5, 0.9, 0.95, 0.99} )
+	@PostMapping(path = "/discardPendingDraft/{aid}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Discard pending draft", description = "Discard pending draft", tags = {
+			"proxy-id-repo-identity-update-controller" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Request authenticated successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = IdRepoAppException.class)))),
+			@ApiResponse(responseCode = "400", description = "No Records Found", content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(hidden = true))),
+			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(hidden = true))) })
+	public ResponseEntity<ResponseWrapper<?>> discardPendingDraft(
+			@PathVariable String aid) {
+		logger.debug("ProxyIdRepoController::discardPendingDraft()::entry");
+		try {
+			ResponseWrapper<?> responseWrapper = proxySerivce
+					.discardDraft(aid);
+			auditUtil.setAuditRequestDto(GET_IDENTITY_UPDATE_COUNT_SUCCESS);
+			logger.debug("ProxyIdRepoController::discardPendingDraft()::exit");
 			return ResponseEntity.ok(responseWrapper);
 		} catch (ResidentServiceCheckedException e) {
 			auditUtil.setAuditRequestDto(GET_IDENTITY_UPDATE_COUNT_EXCEPTION);

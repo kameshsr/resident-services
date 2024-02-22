@@ -526,7 +526,13 @@ public enum AuditEnum implements AuditEvent {
 	INVALID_PAGE_SIZE_VALUE("RES-SER-447", FAILURE, "Invalid page size value", "Invalid page size value %s", "RS-VAL",
 			"Validation", RESIDENT_APPLICATION_ID, RESIDENT_APPLICATION_NAME),
 	INVALID_LANGUAGE_CODE("RES-SER-500", FAILURE, "Invalid language code", "invalid lang code", "RS-VAL",
-			"Validation section", RESIDENT_APPLICATION_ID, RESIDENT_APPLICATION_NAME);
+			"Validation section", RESIDENT_APPLICATION_ID, RESIDENT_APPLICATION_NAME),
+	DISCARD_DRAFT_SUCCESS("RES-SER-249", SUCCESS, "get identity update count: Success",
+			"retrieve remaining update counts for each id attributes for a UIN/VID is succeeded", "RS-IDEN_COUN",
+			"Identity count", RESIDENT_APPLICATION_ID, RESIDENT_APPLICATION_NAME),
+	DISCARD_DRAFT_EXCEPTION("RES-SER-250", FAILURE, "get identity update count: Failed",
+			"retrieve remaining update counts for each id attributes for a UIN/VID is failed", "RS-IDEN_COUN",
+			"Identity count", RESIDENT_APPLICATION_ID, RESIDENT_APPLICATION_NAME),;
 
 	private final String eventId;
 
