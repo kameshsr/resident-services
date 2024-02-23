@@ -331,4 +331,41 @@ public class ResidentServiceRestClient {
 			return new HttpEntity<>(headers);
 	}
 
+	/**
+	 * Put api.
+	 *
+	 * @param <T>           the generic type
+	 * @param uri           the uri
+	 * @param requestType   the request type
+	 * @param responseClass the response class
+	 * @param mediaType
+	 * @return the t
+	 * @throws Exception the exception
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T deleteApi(String uri, Object requestType, Class<?> responseClass, MediaType mediaType)
+			throws ApisResourceAccessException {
+		T result = null;
+		ResponseEntity<T> response = null;
+		try {
+			logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+					LoggerFileConstant.APPLICATIONID.toString(), uri);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(mediaType);
+			HttpEntity<?> entity = new HttpEntity<>(headers);
+
+			response = (ResponseEntity<T>) residentRestTemplate.exchange(uri, HttpMethod.DELETE,
+					entity, responseClass);
+			result = response.getBody();
+		} catch (Exception e) {
+
+			logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+					LoggerFileConstant.APPLICATIONID.toString(), e.getMessage() + ExceptionUtils.getStackTrace(e));
+
+			throw new ApisResourceAccessException("Exception occured while accessing " + uri, e);
+		}
+		return result;
+	}
+
 }

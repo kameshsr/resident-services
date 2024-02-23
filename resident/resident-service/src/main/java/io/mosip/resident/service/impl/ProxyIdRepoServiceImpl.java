@@ -12,6 +12,7 @@ import io.mosip.resident.service.ProxyIdRepoService;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,9 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 
 	@Autowired
 	private ResidentTransactionRepository residentTransactionRepository;
+
+	@Autowired
+	private Environment environment;
 
 	@Override
 	public ResponseWrapper<?> getRemainingUpdateCountByIndividualId(List<String> attributeList)
@@ -86,10 +90,9 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 	public ResponseWrapper<?> discardDraft(String eid) throws ResidentServiceCheckedException{
 		try {
 			logger.debug("ProxyIdRepoServiceImpl::discardDraft()::entry");
-			Map<String, Object> pathsegements = new HashMap<String, Object>();
-			pathsegements.put(REGISTRATION_ID, getAidFromEid(eid));
-			ResponseWrapper<?> responseWrapper = residentServiceRestClient.postApi(ApiName.IDREPO_IDENTITY_DISCARD_DRAFT.name(),
-					MediaType.APPLICATION_JSON, pathsegements, ResponseWrapper.class);
+			ResponseWrapper<?> responseWrapper = residentServiceRestClient.deleteApi(environment.getProperty
+							(ApiName.IDREPO_IDENTITY_DISCARD_DRAFT.name())+getAidFromEid(eid), null,
+					 ResponseWrapper.class, MediaType.APPLICATION_JSON);
 			if (responseWrapper.getErrors() != null && !responseWrapper.getErrors().isEmpty()){
 				if(responseWrapper.getErrors().get(ZERO) != null && !responseWrapper.getErrors().get(ZERO).toString().isEmpty() &&
 						responseWrapper.getErrors().get(ZERO).getErrorCode() != null &&
