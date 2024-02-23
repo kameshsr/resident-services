@@ -7,6 +7,7 @@ import io.mosip.resident.constant.ApiName;
 import io.mosip.resident.constant.ResidentErrorCode;
 import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
+import io.mosip.resident.repository.ResidentTransactionRepository;
 import io.mosip.resident.service.ProxyIdRepoService;
 import io.mosip.resident.util.ResidentServiceRestClient;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -40,6 +41,9 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 	
 	@Autowired
 	private IdentityServiceImpl identityServiceImpl;
+
+	@Autowired
+	private ResidentTransactionRepository residentTransactionRepository;
 
 	@Override
 	public ResponseWrapper<?> getRemainingUpdateCountByIndividualId(List<String> attributeList)
@@ -79,18 +83,18 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 	}
 
 	@Override
-	public ResponseWrapper<?> discardDraft(String aid) throws ResidentServiceCheckedException{
+	public ResponseWrapper<?> discardDraft(String eid) throws ResidentServiceCheckedException{
 		try {
 			logger.debug("ProxyIdRepoServiceImpl::discardDraft()::entry");
 			Map<String, Object> pathsegements = new HashMap<String, Object>();
-			pathsegements.put(REGISTRATION_ID, aid);
+			pathsegements.put(REGISTRATION_ID, getAidFromEid(eid));
 			ResponseWrapper<?> responseWrapper = residentServiceRestClient.postApi(ApiName.IDREPO_IDENTITY_DISCARD_DRAFT.name(),
 					MediaType.APPLICATION_JSON, pathsegements, ResponseWrapper.class);
 			if (responseWrapper.getErrors() != null && !responseWrapper.getErrors().isEmpty()){
 				if(responseWrapper.getErrors().get(ZERO) != null && !responseWrapper.getErrors().get(ZERO).toString().isEmpty() &&
 						responseWrapper.getErrors().get(ZERO).getErrorCode() != null &&
 						!responseWrapper.getErrors().get(ZERO).getErrorCode().isEmpty()) {
-					throw new ResidentServiceCheckedException(ResidentErrorCode.NO_RECORDS_FOUND);
+					throw new ResidentServiceCheckedException(ResidentErrorCode.FAILED_TO_DISCARD_DRAFT);
 				}else {
 					throw new ResidentServiceCheckedException(ResidentErrorCode.UNKNOWN_EXCEPTION);
 				}
@@ -103,6 +107,14 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 			throw new ResidentServiceCheckedException(API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
 					API_RESOURCE_ACCESS_EXCEPTION.getErrorMessage(), e);
 		}
+	}
+
+	private String getAidFromEid(String eid) throws ResidentServiceCheckedException {
+		String aid = residentTransactionRepository.findAidByEventId(eid);
+		if(aid==null){
+			throw new ResidentServiceCheckedException(ResidentErrorCode.AID_NOT_FOUND);
+		}
+		return aid;
 	}
 
 }

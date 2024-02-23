@@ -2,6 +2,8 @@ package io.mosip.resident.controller;
 
 import static io.mosip.resident.constant.ResidentConstants.API_RESPONSE_TIME_DESCRIPTION;
 import static io.mosip.resident.constant.ResidentConstants.API_RESPONSE_TIME_ID;
+import static io.mosip.resident.util.AuditEnum.DISCARD_DRAFT_EXCEPTION;
+import static io.mosip.resident.util.AuditEnum.DISCARD_DRAFT_SUCCESS;
 import static io.mosip.resident.util.AuditEnum.GET_IDENTITY_UPDATE_COUNT_EXCEPTION;
 import static io.mosip.resident.util.AuditEnum.GET_IDENTITY_UPDATE_COUNT_SUCCESS;
 
@@ -9,6 +11,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.mosip.resident.repository.ResidentTransactionRepository;
+import io.mosip.resident.validator.RequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +57,10 @@ public class ProxyIdRepoController {
 	@Autowired
 	private AuditUtil auditUtil;
 
+	@Autowired
+	private RequestValidator requestValidator;
+
+
 	private static final Logger logger = LoggerConfiguration.logConfig(ProxyIdRepoController.class);
 
 	@Timed(value=API_RESPONSE_TIME_ID,description=API_RESPONSE_TIME_DESCRIPTION, percentiles = {0.5, 0.9, 0.95, 0.99} )
@@ -84,7 +92,7 @@ public class ProxyIdRepoController {
 	}
 
 	@Timed(value=API_RESPONSE_TIME_ID,description=API_RESPONSE_TIME_DESCRIPTION, percentiles = {0.5, 0.9, 0.95, 0.99} )
-	@PostMapping(path = "/discardPendingDraft/{aid}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/discardPendingDraft/{eid}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "Discard pending draft", description = "Discard pending draft", tags = {
 			"proxy-id-repo-identity-update-controller" })
 	@ApiResponses(value = {
@@ -94,16 +102,17 @@ public class ProxyIdRepoController {
 			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(hidden = true))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(hidden = true))) })
 	public ResponseEntity<ResponseWrapper<?>> discardPendingDraft(
-			@PathVariable String aid) {
+			@PathVariable String eid) {
 		logger.debug("ProxyIdRepoController::discardPendingDraft()::entry");
 		try {
+			requestValidator.validateEventId(eid);
 			ResponseWrapper<?> responseWrapper = proxySerivce
-					.discardDraft(aid);
-			auditUtil.setAuditRequestDto(GET_IDENTITY_UPDATE_COUNT_SUCCESS);
+					.discardDraft(eid);
+			auditUtil.setAuditRequestDto(DISCARD_DRAFT_SUCCESS);
 			logger.debug("ProxyIdRepoController::discardPendingDraft()::exit");
 			return ResponseEntity.ok(responseWrapper);
 		} catch (ResidentServiceCheckedException e) {
-			auditUtil.setAuditRequestDto(GET_IDENTITY_UPDATE_COUNT_EXCEPTION);
+			auditUtil.setAuditRequestDto(DISCARD_DRAFT_EXCEPTION);
 			ExceptionUtils.logRootCause(e);
 			ResponseWrapper<?> responseWrapper = new ResponseWrapper<>();
 			responseWrapper.setErrors(List.of(new ServiceError(e.getErrorCode(), e.getErrorText())));

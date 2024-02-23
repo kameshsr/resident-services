@@ -121,6 +121,7 @@ public enum ResidentErrorCode {
 	SAME_PHONE_ERROR("RES-SER-520", "Enter a new phone number"),
 	INVALID_LANGUAGE_NAME("RES-SER-521", "Invalid Language Name"),
 	INVALID_UIN_VID_ENTERED("RES-SER-522", "Invalid UIN/VID entered"),
+	FAILED_TO_DISCARD_DRAFT("RES-SER-523", "Failed to discard draft"),
 
 	OTP_EXPIRED("RES-OTP-006", "OTP has expired"),
 	OTP_INVALID("RES-OTP-007", "OTP is invalid"),

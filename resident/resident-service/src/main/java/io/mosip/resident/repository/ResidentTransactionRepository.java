@@ -201,4 +201,7 @@ public interface ResidentTransactionRepository extends JpaRepository<ResidentTra
 			@Param("statusCode") List<String> statusCode, @Param("eventId") String eventId);
 
 	// Service history methods end---
+
+	@Query(value = "select aid from resident_transaction where event_id = :eventId", nativeQuery = true)
+	String findAidByEventId(@Param("eventId") String eventId);
 }
