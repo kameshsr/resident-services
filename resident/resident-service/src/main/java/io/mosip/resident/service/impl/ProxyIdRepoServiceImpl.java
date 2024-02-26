@@ -1,5 +1,7 @@
 package io.mosip.resident.service.impl;
 
+import io.mosip.idrepository.core.dto.IdResponseDTO;
+import io.mosip.kernel.core.exception.ServiceError;
 import io.mosip.kernel.core.http.ResponseWrapper;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.resident.config.LoggerConfiguration;
@@ -13,7 +15,6 @@ import io.mosip.resident.util.ResidentServiceRestClient;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -90,20 +91,29 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 	public ResponseWrapper<?> discardDraft(String eid) throws ResidentServiceCheckedException{
 		try {
 			logger.debug("ProxyIdRepoServiceImpl::discardDraft()::entry");
-			ResponseWrapper<?> responseWrapper = residentServiceRestClient.deleteApi(environment.getProperty
-							(ApiName.IDREPO_IDENTITY_DISCARD_DRAFT.name())+getAidFromEid(eid), null,
-					 ResponseWrapper.class, MediaType.APPLICATION_JSON);
-			if (responseWrapper.getErrors() != null && !responseWrapper.getErrors().isEmpty()){
-				if(responseWrapper.getErrors().get(ZERO) != null && !responseWrapper.getErrors().get(ZERO).toString().isEmpty() &&
-						responseWrapper.getErrors().get(ZERO).getErrorCode() != null &&
-						!responseWrapper.getErrors().get(ZERO).getErrorCode().isEmpty()) {
-					throw new ResidentServiceCheckedException(ResidentErrorCode.FAILED_TO_DISCARD_DRAFT);
+			List<String> pathsegments = new ArrayList<String>();
+			pathsegments.add(getAidFromEid(eid));
+			IdResponseDTO response = (IdResponseDTO) residentServiceRestClient.
+					deleteApi(ApiName.IDREPO_IDENTITY_DISCARD_DRAFT, pathsegments, "", "", IdResponseDTO.class);
+			if (response.getErrors() != null && !response.getErrors().isEmpty()) {
+				ServiceError error = response.getErrors().get(0);
+				logger.error("Error occurred while discarding draft for id : " + eid, error.toString());
+				throw new ResidentServiceCheckedException(ResidentErrorCode.FAILED_TO_DISCARD_DRAFT);
+			}
+
+			if (response.getErrors() != null && !response.getErrors().isEmpty()){
+				if(response.getErrors().get(ZERO) != null && !response.getErrors().get(ZERO).toString().isEmpty() &&
+						response.getErrors().get(ZERO).getErrorCode() != null &&
+						!response.getErrors().get(ZERO).getErrorCode().isEmpty() &&
+						response.getErrors().get(ZERO).getErrorCode().equalsIgnoreCase(NO_RECORDS_FOUND_ID_REPO_ERROR_CODE)) {
+					throw new ResidentServiceCheckedException(ResidentErrorCode.NO_RECORDS_FOUND);
 				}else {
 					throw new ResidentServiceCheckedException(ResidentErrorCode.UNKNOWN_EXCEPTION);
 				}
 			}
+
 			logger.debug("ProxyIdRepoServiceImpl::discardDraft()::exit");
-			return responseWrapper;
+			return response;
 
 		} catch (ApisResourceAccessException e) {
 			logger.error(ExceptionUtils.getStackTrace(e));
