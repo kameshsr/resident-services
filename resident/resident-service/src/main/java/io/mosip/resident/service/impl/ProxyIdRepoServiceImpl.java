@@ -95,11 +95,6 @@ public class ProxyIdRepoServiceImpl implements ProxyIdRepoService {
 			pathsegments.add(getAidFromEid(eid));
 			IdResponseDTO response = (IdResponseDTO) residentServiceRestClient.
 					deleteApi(ApiName.IDREPO_IDENTITY_DISCARD_DRAFT, pathsegments, "", "", IdResponseDTO.class);
-			if (response.getErrors() != null && !response.getErrors().isEmpty()) {
-				ServiceError error = response.getErrors().get(0);
-				logger.error("Error occurred while discarding draft for id : " + eid, error.toString());
-				throw new ResidentServiceCheckedException(ResidentErrorCode.FAILED_TO_DISCARD_DRAFT);
-			}
 
 			if (response.getErrors() != null && !response.getErrors().isEmpty()){
 				if(response.getErrors().get(ZERO) != null && !response.getErrors().get(ZERO).toString().isEmpty() &&
