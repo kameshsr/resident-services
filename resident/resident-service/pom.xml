@@ -16,19 +16,22 @@
         <commons.packet.manager.version>1.2.1-SNAPSHOT</commons.packet.manager.version>
         <kernel.core.version>1.2.1-SNAPSHOT</kernel.core.version>
         <kernel.virusscanner.clamav.version>1.2.1-SNAPSHOT</kernel.virusscanner.clamav.version>
+        <id-repository-core.version>1.2.1-SNAPSHOT</id-repository-core.version>
         <kernel-keymanager-service.version>1.2.1-SNAPSHOT</kernel-keymanager-service.version>
         <kernel.authcodeflowproxy.api.version>1.2.1-SNAPSHOT</kernel.authcodeflowproxy.api.version>
         <kernel.parent.version>1.2.1-SNAPSHOT</kernel.parent.version>
         <kernel-cbeffutil-api.version>${kernel.parent.version}</kernel-cbeffutil-api.version>
         <kernel.khazana.version>1.2.1-SNAPSHOT</kernel.khazana.version>
+        <pre-registration-application-service.version>1.2.1-SNAPSHOT</pre-registration-application-service.version>
         <kernel-openid-bridge-api.version>1.2.1-SNAPSHOT</kernel-openid-bridge-api.version>
         <maven.jacoco.plugin.version>0.8.11</maven.jacoco.plugin.version>
         <kernel.idobjectvalidator.version>1.2.1-SNAPSHOT</kernel.idobjectvalidator.version>
-
-        <!-- Not migrated so using below version to be changed for below services -->
-        <pre-registration-application-service.version>1.2.1-java21-SNAPSHOT</pre-registration-application-service.version>
-        <id-repository-core.version>1.2.1-java21-SNAPSHOT</id-repository-core.version>
-
+        <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
+        <maven.sonar.plugin.version>3.7.0.1746</maven.sonar.plugin.version>
+        <sonar.coverage.exclusions>
+            **/constant/**,**/config/**,**/httpfilter/**,**/cache/**,**/dto/**,**/entity/**,**/model/**,**/exception/**,**/repository/**,**/security/**,**/*Config.java,**/*BootApplication.java,**/*VertxApplication.java,**/cbeffutil/**,**/mock/**,**/OrderCard*,**/testrig/**
+        </sonar.coverage.exclusions>
+        <sonar.cpd.exclusions>**/dto/**,**/entity/**,**/config/**</sonar.cpd.exclusions>
     </properties>
     <dependencies>
         <dependency>
@@ -336,6 +339,52 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.plugin.version}</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                    <skip>false</skip>
+                    <argLine>
+                        --add-opens=java.base/java.lang=ALL-UNNAMED
+                        --add-opens=java.base/java.util=ALL-UNNAMED
+                        --add-opens=java.base/java.net=ALL-UNNAMED
+                        --add-opens=java.base/java.time=ALL-UNNAMED
+                        --add-opens=java.base/java.io=ALL-UNNAMED
+                        --add-opens=java.base/java.time.format=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/constant/**</exclude>
+                        <exclude>**/config/**</exclude>
+                        <exclude>**/dto/**</exclude>
+                        <exclude>**/entity/**</exclude>
+                        <exclude>**/repository/**</exclude>
+                        <exclude>**/*BootApplication.class</exclude>
+                        <exclude>**/httpfilter/**</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -438,24 +487,6 @@
                             <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
                             <!-- <format>json</format> -->
                         </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
