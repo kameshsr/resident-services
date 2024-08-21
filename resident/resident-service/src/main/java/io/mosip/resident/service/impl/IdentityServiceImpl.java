@@ -283,6 +283,9 @@ public class IdentityServiceImpl implements IdentityService {
 	
 	private Map<String, String> getClaimsFromToken(Set<String> claims, String token) throws ApisResourceAccessException {
 		Map<String, Object> userInfo = utility.getUserInfo(token);
+		for (Map.Entry<String, Object> entry : userInfo.entrySet()) {
+			System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+		}
 		return claims.stream().map(claim -> new SimpleEntry<>(claim, getClaimFromUserInfo(userInfo, claim)))
 				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 	}
