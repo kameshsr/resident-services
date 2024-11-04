@@ -10,7 +10,6 @@ import io.mosip.kernel.templatemanager.velocity.builder.TemplateManagerBuilderIm
 import io.mosip.kernel.transliteration.icu4j.impl.TransliterationImpl;
 import io.mosip.kernel.websub.api.config.WebSubClientConfig;
 import io.mosip.kernel.websub.api.config.publisher.RestTemplateHelper;
-import io.mosip.kernel.websub.api.config.publisher.WebSubPublisherClientConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -44,7 +43,7 @@ import org.springframework.web.client.RestTemplate;
 @Import({TokenIDGenerator.class, ValidateTokenUtil.class, CbeffImpl.class, TransliterationService.class, TransliterationServiceUtil.class
 , PDFGeneratorImpl.class, UinValidatorImpl.class, VidValidatorImpl.class, RidValidatorImpl.class, TemplateManagerBuilderImpl.class,
 		RestTemplateHelper.class, TransliterationImpl.class, IdObjectValidatorConfig.class
-, RestTemplate.class, KeyStoreImpl.class, WebSubClientConfig.class, WebSubPublisherClientConfig.class})
+, RestTemplate.class, KeyStoreImpl.class, WebSubClientConfig.class})
 public class ResidentBootApplication {
 
 	public static void main(String[] args) {
