@@ -225,7 +225,9 @@ public class IdentityUtil {
 		if (Objects.isNull(nameValueList)) {
 			try {
 				Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();
-				String nameValue = (String) identityMappingMap.get(ResidentConstants.NAME);
+                Map nameMap = (Map) identityMappingMap.get(ResidentConstants.NAME);
+				String nameValue = (String) nameMap.get(ResidentConstants.VALUE);
+
 				if(nameValue.contains(ResidentConstants.COMMA)){
 					return List.of(nameValue.split(ResidentConstants.COMMA));
 				} else{
