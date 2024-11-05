@@ -3,6 +3,7 @@ package io.mosip.resident.util;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.resident.config.LoggerConfiguration;
 import io.mosip.resident.constant.IdType;
+import io.mosip.resident.constant.LoggerFileConstant;
 import io.mosip.resident.constant.ResidentConstants;
 import io.mosip.resident.constant.ResidentErrorCode;
 import io.mosip.resident.dto.IdResponseDTO1;
@@ -11,6 +12,7 @@ import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
 import io.mosip.resident.handler.service.ResidentConfigService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -32,6 +34,7 @@ import static io.mosip.resident.constant.ResidentConstants.IDENTITY;
 @Component
 public class IdentityUtil {
 
+	private static final int SIZE = 1;
 	private final Logger logger = LoggerConfiguration.logConfig(IdentityUtil.class);
 
 	@Autowired
@@ -70,6 +73,9 @@ public class IdentityUtil {
 
 	@Autowired
 	private PerpetualVidUtil perpetualVidUtil;
+
+
+	private List<String> nameValueList;
 
 	public Map<String, Object> getIdentityAttributes(String id, String schemaType) throws ResidentServiceCheckedException, IOException {
 		return getIdentityAttributes(id, schemaType, List.of(
@@ -178,8 +184,7 @@ public class IdentityUtil {
 				LocalDate localDate=LocalDate.parse(dateOfBirth, formatter);
 				identityDTO.setYearOfBirth(Integer.toString(localDate.getYear()));
 			}
-			String name = utility.getMappingValue(identity, ResidentConstants.NAME, langCode);
-			identityDTO.setFullName(name);
+            identityDTO.setFullName(getFullName(identity, langCode));
 			identityDTO.putAll((Map<? extends String, ? extends Object>) identity.get(IDENTITY));
 
 			if(fetchFace) {
@@ -198,5 +203,42 @@ public class IdentityUtil {
 		}
 		logger.debug("IdentityServiceImpl::getIdentity()::exit");
 		return identityDTO;
+	}
+
+	public String getFullName(Map<String, Object> identity, String langCode) throws ResidentServiceCheckedException, IOException {
+		if(nameValueList==null){
+			nameValueList= getNameValueFromIdentityMapping();
+		}
+		if(nameValueList.size()==SIZE){
+			return utility.getMappingValue(identity, nameValueList.getFirst(), langCode);
+		} else {
+			StringBuilder nameValue = new StringBuilder();
+            for (String nameString : nameValueList) {
+                nameValue.append(utility.getMappingValue(identity, nameString, langCode));
+            }
+			return String.valueOf(nameValue);
+		}
+	}
+
+	@PostConstruct
+	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
+		if (Objects.isNull(nameValueList)) {
+			try {
+				Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();
+				String nameValue = (String) identityMappingMap.get(ResidentConstants.NAME);
+				if(nameValue.contains(ResidentConstants.COMMA)){
+					return List.of(nameValue.split(ResidentConstants.COMMA));
+				} else{
+					return List.of(nameValue);
+				}
+			} catch (IOException e) {
+				logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(),
+						"getNameValueFromIdentityMapping",
+						ResidentErrorCode.API_RESOURCE_UNAVAILABLE.getErrorCode() + org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(e));
+				throw new ResidentServiceCheckedException(ResidentErrorCode.POLICY_EXCEPTION.getErrorCode(),
+						ResidentErrorCode.POLICY_EXCEPTION.getErrorMessage(), e);
+			}
+		}
+		return nameValueList;
 	}
 }
