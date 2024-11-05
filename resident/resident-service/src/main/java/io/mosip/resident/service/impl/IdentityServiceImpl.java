@@ -49,6 +49,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.mosip.resident.constant.ResidentConstants.IDENTITY;
+import static io.mosip.resident.constant.ResidentConstants.ZERO;
 
 /**
  * Resident identity service implementation class.
@@ -425,7 +426,7 @@ public class IdentityServiceImpl implements IdentityService {
 			nameValueList= getNameValueFromIdentityMapping();
 		}
 		if(nameValueList.size()==SIZE){
-			return utility.getMappingValue(identity, nameValueList.getFirst(), langCode);
+			return utility.getMappingValue(identity, nameValueList.get(ZERO), langCode);
 		} else {
 			StringBuilder nameValue = new StringBuilder();
 			for (String nameString : nameValueList) {
