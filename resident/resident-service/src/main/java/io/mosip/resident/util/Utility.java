@@ -38,7 +38,6 @@ import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
 import io.mosip.resident.helper.ObjectStoreHelper;
 import io.mosip.resident.repository.ResidentTransactionRepository;
-import io.mosip.resident.service.impl.ResidentConfigServiceImpl;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.assertj.core.util.Lists;
@@ -155,7 +154,6 @@ public class Utility {
 	private static String ANONYMOUS_USER = "anonymousUser";
 
 	private String ridDelimeterValue;
-	private String nameValue;
 
 	@Autowired(required = true)
 	@Qualifier("varres")
