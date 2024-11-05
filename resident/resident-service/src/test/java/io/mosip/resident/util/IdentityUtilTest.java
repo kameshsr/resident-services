@@ -86,7 +86,9 @@ public class IdentityUtilTest {
         when(residentConfigService.getUiSchemaFilteredInputAttributes(anyString()))
                 .thenReturn(List.of("UIN", "email", "phone", "dateOfBirth", "firstName", "middleName", "lastName", "perpetualVID"));
         Map<String, Object> identityMappingMap = new HashMap<>();
-        identityMappingMap.put("name", "fullName");
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("value", "fullName");
+        identityMappingMap.put("name", valueMap);
         when(residentConfigService.getIdentityMappingMap()).thenReturn(identityMappingMap);
         Optional<String> perpVid = Optional.of("8251649601");
         when(perpetualVidUtil.getPerpatualVid(anyString())).thenReturn(perpVid);
