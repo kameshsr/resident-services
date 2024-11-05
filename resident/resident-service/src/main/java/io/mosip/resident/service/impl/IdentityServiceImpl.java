@@ -7,6 +7,7 @@ import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.openid.bridge.model.AuthUserDetails;
 import io.mosip.resident.config.LoggerConfiguration;
 import io.mosip.resident.constant.IdType;
+import io.mosip.resident.constant.LoggerFileConstant;
 import io.mosip.resident.constant.ResidentConstants;
 import io.mosip.resident.constant.ResidentErrorCode;
 import io.mosip.resident.dto.IdResponseDTO1;
@@ -29,6 +30,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -97,6 +99,10 @@ public class IdentityServiceImpl implements IdentityService {
 	@Autowired
     private Utilities  utilities;
 
+	private List<String> nameValueList;
+
+	private static final int SIZE = 1;
+
 	private static final Logger logger = LoggerConfiguration.logConfig(IdentityServiceImpl.class);
 	
 	@Override
@@ -123,8 +129,7 @@ public class IdentityServiceImpl implements IdentityService {
 				LocalDate localDate=LocalDate.parse(dateOfBirth, formatter);
 				identityDTO.setYearOfBirth(Integer.toString(localDate.getYear()));
 			}
-			String name = utility.getMappingValue(identity, ResidentConstants.NAME, langCode);
-			identityDTO.setFullName(name);
+			identityDTO.setFullName(getFullName(identity, langCode));
 			identityDTO.putAll((Map<? extends String, ? extends Object>) identity.get(IDENTITY));
 
 			if(fetchFace) {
@@ -413,5 +418,42 @@ public class IdentityServiceImpl implements IdentityService {
 		} else {
 			return IdType.AID;
 		}
+	}
+
+	public String getFullName(Map<String, Object> identity, String langCode) throws ResidentServiceCheckedException, IOException {
+		if(nameValueList==null){
+			nameValueList= getNameValueFromIdentityMapping();
+		}
+		if(nameValueList.size()==SIZE){
+			return utility.getMappingValue(identity, nameValueList.getFirst(), langCode);
+		} else {
+			StringBuilder nameValue = new StringBuilder();
+			for (String nameString : nameValueList) {
+				nameValue.append(utility.getMappingValue(identity, nameString, langCode));
+			}
+			return String.valueOf(nameValue);
+		}
+	}
+
+	@PostConstruct
+	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
+		if (Objects.isNull(nameValueList)) {
+			try {
+				Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();
+				String nameValue = (String) identityMappingMap.get(ResidentConstants.NAME);
+				if(nameValue.contains(ResidentConstants.COMMA)){
+					return List.of(nameValue.split(ResidentConstants.COMMA));
+				} else{
+					return List.of(nameValue);
+				}
+			} catch (IOException e) {
+				logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(),
+						"getNameValueFromIdentityMapping",
+						ResidentErrorCode.API_RESOURCE_UNAVAILABLE.getErrorCode() + org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(e));
+				throw new ResidentServiceCheckedException(ResidentErrorCode.POLICY_EXCEPTION.getErrorCode(),
+						ResidentErrorCode.POLICY_EXCEPTION.getErrorMessage(), e);
+			}
+		}
+		return nameValueList;
 	}
 }

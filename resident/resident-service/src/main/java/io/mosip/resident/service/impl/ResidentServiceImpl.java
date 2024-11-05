@@ -2085,7 +2085,7 @@ public class ResidentServiceImpl implements ResidentService {
 			try {
 				Map<String, Object> identity = identityServiceImpl
 						.getIdentityAttributes(identityServiceImpl.getResidentIndvidualIdFromSession(), null);
-				name = utility.getMappingValue(identity, ResidentConstants.NAME, langCode);
+				name = identityServiceImpl.getFullName(identity, langCode);
 			} catch (IOException e) {
 				logger.error("Error occured in accessing identity data %s", e.getMessage());
 				throw new ResidentServiceCheckedException(ResidentErrorCode.IO_EXCEPTION.getErrorCode(),
