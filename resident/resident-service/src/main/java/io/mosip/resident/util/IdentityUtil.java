@@ -225,9 +225,9 @@ public class IdentityUtil {
 				String nameValue = (String) nameMap.get(ResidentConstants.VALUE);
 
 				if(nameValue.contains(ResidentConstants.COMMA)){
-					return List.of(nameValue.split(ResidentConstants.COMMA));
+					nameValueList = List.of(nameValue.split(ResidentConstants.COMMA));
 				} else{
-					return List.of(nameValue);
+					nameValueList = List.of(nameValue);
 				}
 			} catch (IOException e) {
 				logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(),
