@@ -209,15 +209,11 @@ public class IdentityUtil {
 		if(nameValueList==null){
 			nameValueList= getNameValueFromIdentityMapping();
 		}
-		if(nameValueList.size()==SIZE){
-			return utility.getMappingValue(identity, nameValueList.getFirst(), langCode);
-		} else {
-			StringBuilder nameValue = new StringBuilder();
-            for (String nameString : nameValueList) {
-                nameValue.append(utility.getMappingValue(identity, nameString, langCode));
-            }
-			return String.valueOf(nameValue);
+		StringBuilder nameValue = new StringBuilder();
+		for (String nameString : nameValueList) {
+			nameValue.append(utility.getMappingValue(identity, nameString, langCode));
 		}
+		return String.valueOf(nameValue);
 	}
 
 	@PostConstruct
