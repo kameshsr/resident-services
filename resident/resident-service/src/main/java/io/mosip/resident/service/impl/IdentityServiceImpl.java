@@ -425,27 +425,51 @@ public class IdentityServiceImpl implements IdentityService {
 		if(nameValueList==null){
 			nameValueList= getNameValueFromIdentityMapping();
 		}
-		if(nameValueList.size()==SIZE){
-			return utility.getMappingValue(identity, nameValueList.get(ZERO), langCode);
-		} else {
-			StringBuilder nameValue = new StringBuilder();
-			for (String nameString : nameValueList) {
-				nameValue.append(utility.getMappingValue(identity, nameString, langCode));
-			}
-			return String.valueOf(nameValue);
+		StringBuilder nameValue = new StringBuilder();
+		for (String nameString : nameValueList) {
+			nameValue.append(getValueFromIdentityMapping(nameString, identity, langCode));
 		}
+		return String.valueOf(nameValue);
 	}
+
+	private String getValueFromIdentityMapping(String nameString, Map<String, Object> identity, String langCode) {
+		if (nameString == null || identity == null || langCode == null) {
+			return ""; // Return early if any input is null
+		}
+
+		// Retrieve the identity value map
+		Map<String, Object> identityValueMap = (Map<String, Object>) identity.get(IDENTITY);
+		if (identityValueMap == null) {
+			return ""; // Return early if identity map is null
+		}
+
+		// Retrieve the list of nameValueMap
+		List<Map<String, Object>> nameValueMap = (List<Map<String, Object>>) identityValueMap.get(nameString);
+		if (nameValueMap == null) {
+			return ""; // Return early if the nameValueMap is null
+		}
+
+		// Use stream to find the matching language and return the corresponding value
+		return nameValueMap.stream()
+				.filter(nameMap -> langCode.equalsIgnoreCase((String) nameMap.get(ResidentConstants.LANGUAGE)))
+				.map(nameMap -> (String) nameMap.get(ResidentConstants.VALUE))
+				.findFirst() // Get the first matching value
+				.orElse(""); // Return an empty string if no match is found
+	}
+
 
 	@PostConstruct
 	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
 		if (Objects.isNull(nameValueList)) {
 			try {
 				Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();
-				String nameValue = (String) identityMappingMap.get(ResidentConstants.NAME);
+				Map nameMap = (Map) identityMappingMap.get(ResidentConstants.NAME);
+				String nameValue = (String) nameMap.get(ResidentConstants.VALUE);
+
 				if(nameValue.contains(ResidentConstants.COMMA)){
-					return List.of(nameValue.split(ResidentConstants.COMMA));
+					nameValueList = List.of(nameValue.split(ResidentConstants.COMMA));
 				} else{
-					return List.of(nameValue);
+					nameValueList = List.of(nameValue);
 				}
 			} catch (IOException e) {
 				logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(),
