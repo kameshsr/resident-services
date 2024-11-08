@@ -3,11 +3,12 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mosip_resident-services&id=mosip_resident-services&branch=release-1.2.0&metric=alert_status)](https://sonarcloud.io/dashboard?id=mosip_resident-services&branch=release-1.2.0)
 
 # Resident Services
+## Overview
 This repository contains the source code and design documents for MOSIP Resident Service. For an overview please refer [here](https://docs.mosip.io/1.2.0/modules/resident-services). This module exposes API endpoints for Resident UI (refer [Resident UI github repo](https://github.com/mosip/resident-ui/blob/master/README.md)).
 
 
 ## Database
-See [DB guide](db_scripts/README.md)
+See [DB guide](db_scripts)
 
 ## Config-Server
 To run Resident services, run [Config Server](https://docs.mosip.io/1.2.0/modules/module-configuration#config-server)
@@ -91,7 +92,7 @@ To deploy Commons services on Kubernetes cluster using Dockers refer to [Sandbox
 defined here.
 
 ## Test
-Automated functional tests available in [Functional Tests repo](https://github.com/mosip/mosip-functional-tests).
+Automated functional tests available in [Functional Tests repo](api-test).
 
 ## APIs
 API documentation is available [here](https://mosip.github.io/documentation/).
