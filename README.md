@@ -13,7 +13,7 @@ See [DB guide](db_scripts/README.md)
 To run Resident services, run [Config Server](https://docs.mosip.io/1.2.0/modules/module-configuration#config-server)
 
 ## Build & run (for developers)
-The project requires JDK 1.21.
+The project requires JDK 21.0.3
 and mvn version - 3.9.6
 1. Build and install:
     ```
