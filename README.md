@@ -14,11 +14,24 @@ To run Resident services, run [Config Server](https://docs.mosip.io/1.2.0/module
 
 ## Build & run (for developers)
 The project requires JDK 1.21.
+and mvn version - 3.9.6
 1. Build and install:
     ```
     $ cd resident-service
     $ mvn install -DskipTests=true -Dmaven.javadoc.skip=true -Dgpg.skip=true
     ```
+
+### Remove the version-specific suffix (PostgreSQL95Dialect) from the Hibernate dialect configuration
+   ```
+   hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+   ```
+This is for better compatibility with future PostgreSQL versions.
+
+### Configure ANT Path Matcher for Spring Boot 3.x compatibility.
+   ```
+   spring.mvc.pathmatch.matching-strategy=ANT_PATH_MATCHER
+   ```
+This is to maintain compatibility with existing ANT-style path patterns.
 
 ### Add Below Config in [resident-default.properties](https://github.com/mosip/mosip-config/blob/develop/resident-default.properties)
 ```
@@ -34,9 +47,6 @@ mosip.kernel.keymanager.hsm.config-path=/config/softhsm-application.conf
 # For Offline & JCE proer can be left blank. JCE password use other JCE specific properties.
 
 mosip.kernel.keymanager.hsm.keystore-pass=${softhsm.kernel.security.pin}
-
-# For Spring-boot 3.x we need to specify the ANT Path Matcher for using the existing ANT path patterns.
-spring.mvc.pathmatch.matching-strategy=ANT_PATH_MATCHER
 
 # Spring boot 3.x onwards we need to specify the below property to unmask values in actuator env url
 management.endpoint.env.show-values=ALWAYS  
@@ -62,7 +72,7 @@ mosip.service.end-points=/**/req/otp,/**/proxy/**,/**/validate-otp,/**/channel/v
    <dependency>
        <groupId>io.mosip.kernel</groupId>
        <artifactId>kernel-auth-adapter</artifactId>
-       <version>${kernel.auth.adaptor.version}</version>
+       <version>${kernel.auth.adapter.version}</version>
    </dependency>
    <dependency>
        <groupId>io.mosip.kernel</groupId>
