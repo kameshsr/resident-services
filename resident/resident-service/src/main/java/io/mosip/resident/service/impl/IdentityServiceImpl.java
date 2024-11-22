@@ -6,10 +6,7 @@ import io.mosip.idrepository.core.util.TokenIDGenerator;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.openid.bridge.model.AuthUserDetails;
 import io.mosip.resident.config.LoggerConfiguration;
-import io.mosip.resident.constant.IdType;
-import io.mosip.resident.constant.LoggerFileConstant;
-import io.mosip.resident.constant.ResidentConstants;
-import io.mosip.resident.constant.ResidentErrorCode;
+import io.mosip.resident.constant.*;
 import io.mosip.resident.dto.IdResponseDTO1;
 import io.mosip.resident.dto.IdentityDTO;
 import io.mosip.resident.exception.ApisResourceAccessException;
@@ -155,6 +152,7 @@ public class IdentityServiceImpl implements IdentityService {
 		StringBuilder nameValue = new StringBuilder();
 		for (String nameString : nameValueList) {
 			nameValue.append(getValueFromIdentityMapping(nameString, identity, langCode));
+			nameValue.append(RegistrationConstants.SPACE);
 		}
 		return String.valueOf(nameValue);
 	}
@@ -184,7 +182,7 @@ public class IdentityServiceImpl implements IdentityService {
 				.orElse(""); // Return an empty string if no match is found
 	}
 
-	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
+	public List<String> initializeNameValueList() throws ResidentServiceCheckedException {
 		if (Objects.isNull(nameValueList)) {
 			try {
 				Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();
@@ -203,6 +201,13 @@ public class IdentityServiceImpl implements IdentityService {
 				throw new ResidentServiceCheckedException(ResidentErrorCode.POLICY_EXCEPTION.getErrorCode(),
 						ResidentErrorCode.POLICY_EXCEPTION.getErrorMessage(), e);
 			}
+		}
+		return nameValueList;
+	}
+
+	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
+		if (Objects.isNull(nameValueList)) {
+			initializeNameValueList();
 		}
 		return nameValueList;
 	}
