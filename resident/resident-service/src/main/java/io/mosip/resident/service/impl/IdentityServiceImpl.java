@@ -182,7 +182,8 @@ public class IdentityServiceImpl implements IdentityService {
 				.orElse(""); // Return an empty string if no match is found
 	}
 
-	public List<String> initializeNameValueList() throws ResidentServiceCheckedException {
+	@PostConstruct
+	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
 		if (Objects.isNull(nameValueList)) {
 			try {
 				Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();
@@ -205,12 +206,6 @@ public class IdentityServiceImpl implements IdentityService {
 		return nameValueList;
 	}
 
-	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
-		if (Objects.isNull(nameValueList)) {
-			initializeNameValueList();
-		}
-		return nameValueList;
-	}
 	
 	@Override
 	public Map<String, Object> getIdentityAttributes(String id, String schemaType) throws ResidentServiceCheckedException, IOException {
