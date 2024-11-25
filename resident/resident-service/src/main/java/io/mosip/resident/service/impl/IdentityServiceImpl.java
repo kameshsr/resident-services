@@ -145,17 +145,16 @@ public class IdentityServiceImpl implements IdentityService {
 		return identityDTO;
 	}
 
-	public String getFullName(Map<String, Object> identity, String langCode) throws ResidentServiceCheckedException, IOException {
-		if(nameValueList==null){
-			nameValueList= getNameValueFromIdentityMapping();
+	public String getFullName(Map<String, Object> identity, String langCode)
+			throws ResidentServiceCheckedException, IOException {
+		if (nameValueList == null) {
+			nameValueList = getNameValueFromIdentityMapping();
 		}
-		StringBuilder nameValue = new StringBuilder();
-		for (String nameString : nameValueList) {
-			nameValue.append(getValueFromIdentityMapping(nameString, identity, langCode));
-			nameValue.append(RegistrationConstants.SPACE);
-		}
-		return String.valueOf(nameValue);
+		return nameValueList.stream()
+				.map(nameString -> getValueFromIdentityMapping(nameString, identity, langCode))
+				.collect(Collectors.joining(RegistrationConstants.SPACE));
 	}
+
 
 	private String getValueFromIdentityMapping(String nameString, Map<String, Object> identity, String langCode) {
 		if (nameString == null || identity == null || langCode == null) {

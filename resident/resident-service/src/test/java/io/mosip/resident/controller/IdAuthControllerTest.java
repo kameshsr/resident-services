@@ -1,9 +1,14 @@
 package io.mosip.resident.controller;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
+import io.mosip.resident.exception.ResidentServiceCheckedException;
+import io.mosip.resident.handler.service.ResidentConfigService;
 import io.mosip.resident.util.Utility;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,8 +96,11 @@ public class IdAuthControllerTest {
 	String reqJson;
 	private RequestWrapper<IdAuthRequestDto> requestWrapper;
 
+	@Mock
+	private ResidentConfigService residentConfigService;
+
 	@Before
-	public void setUp() {
+	public void setUp() throws ResidentServiceCheckedException, IOException {
 		MockitoAnnotations.initMocks(this);
 		this.mockMvc = MockMvcBuilders.standaloneSetup(idAuthController).build();
 		requestWrapper = new RequestWrapper<IdAuthRequestDto>();
@@ -104,6 +112,11 @@ public class IdAuthControllerTest {
 		reqJson = gson.toJson(requestWrapper);
 		Mockito.doNothing().when(auditUtil).setAuditRequestDto(Mockito.any());
 		ReflectionTestUtils.setField(idAuthController, "validateOtpId", "validate-otp-id");
+		Map<String, Object> identityMappingMap = new HashMap<>();
+		Map<String, String> valueMap = new HashMap<>();
+		valueMap.put("value", "fullName");
+		identityMappingMap.put("name", valueMap);
+		when(residentConfigService.getIdentityMappingMap()).thenReturn(identityMappingMap);
 	}
 
 	@Test
