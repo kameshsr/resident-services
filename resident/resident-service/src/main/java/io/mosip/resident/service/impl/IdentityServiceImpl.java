@@ -6,7 +6,10 @@ import io.mosip.idrepository.core.util.TokenIDGenerator;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.openid.bridge.model.AuthUserDetails;
 import io.mosip.resident.config.LoggerConfiguration;
-import io.mosip.resident.constant.*;
+import io.mosip.resident.constant.IdType;
+import io.mosip.resident.constant.LoggerFileConstant;
+import io.mosip.resident.constant.ResidentConstants;
+import io.mosip.resident.constant.ResidentErrorCode;
 import io.mosip.resident.dto.IdResponseDTO1;
 import io.mosip.resident.dto.IdentityDTO;
 import io.mosip.resident.exception.ApisResourceAccessException;
@@ -20,6 +23,7 @@ import io.mosip.resident.util.Utility;
 import io.mosip.resident.validator.RequestValidator;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
+import io.mosip.resident.constant.RegistrationConstants;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +31,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -181,7 +184,6 @@ public class IdentityServiceImpl implements IdentityService {
 				.orElse(""); // Return an empty string if no match is found
 	}
 
-	@PostConstruct
 	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
 		if (Objects.isNull(nameValueList)) {
 			try {
