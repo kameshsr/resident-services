@@ -1145,7 +1145,7 @@ public class Utility {
 	}
 
 	@Cacheable(value = "getNameValueFromIdentityMapping")
-    public List<String> getNameValueFromIdentityMapping(IdentityServiceImpl identityService) throws ResidentServiceCheckedException {
+    public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
         if (Objects.isNull(nameValueList)) {
             try {
                 Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();

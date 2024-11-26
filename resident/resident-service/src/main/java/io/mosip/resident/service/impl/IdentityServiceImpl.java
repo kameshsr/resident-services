@@ -150,7 +150,7 @@ public class IdentityServiceImpl implements IdentityService {
 	public String getFullName(Map<String, Object> identity, String langCode)
 			throws ResidentServiceCheckedException, IOException {
 		if (nameValueList == null) {
-			nameValueList = utility.getNameValueFromIdentityMapping(this);
+			nameValueList = utility.getNameValueFromIdentityMapping();
 		}
 		return nameValueList.stream()
 				.map(nameString -> getValueFromIdentityMapping(nameString, identity, langCode))
