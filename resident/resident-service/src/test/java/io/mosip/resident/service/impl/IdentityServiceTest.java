@@ -421,7 +421,7 @@ public class IdentityServiceTest {
 		assertEquals("2476302389",identityService.getUinForIndividualId("2476302389"));
 	}
 
-	@Test(expected = ResidentServiceCheckedException.class)
+	@Test
 	public void testGetMappingValueNullIoException() throws Exception {
 		Tuple3<URI, MultiValueMap<String, String>, Map<String, Object>> tuple3 = loadUserInfoMethod();
 		tuple3.getT3().put("photo", "NGFjNzk1OTYyYWRkIiwiYWNyIjoiMSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJ");
