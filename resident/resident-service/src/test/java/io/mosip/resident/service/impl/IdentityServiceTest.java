@@ -422,7 +422,7 @@ public class IdentityServiceTest {
 	}
 
 	@Test
-	public void testGetMappingValueNullIoException() throws Exception {
+	public void testGetMappingValue() throws Exception {
 		Tuple3<URI, MultiValueMap<String, String>, Map<String, Object>> tuple3 = loadUserInfoMethod();
 		tuple3.getT3().put("photo", "NGFjNzk1OTYyYWRkIiwiYWNyIjoiMSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJ");
 		when(restClientWithPlainRestTemplate.getApi(tuple3.getT1(), String.class, tuple3.getT2()))
