@@ -7,7 +7,6 @@ import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.openid.bridge.model.AuthUserDetails;
 import io.mosip.resident.config.LoggerConfiguration;
 import io.mosip.resident.constant.IdType;
-import io.mosip.resident.constant.LoggerFileConstant;
 import io.mosip.resident.constant.ResidentConstants;
 import io.mosip.resident.constant.ResidentErrorCode;
 import io.mosip.resident.dto.IdResponseDTO1;
@@ -151,7 +150,7 @@ public class IdentityServiceImpl implements IdentityService {
 	public String getFullName(Map<String, Object> identity, String langCode)
 			throws ResidentServiceCheckedException, IOException {
 		if (nameValueList == null) {
-			nameValueList = getNameValueFromIdentityMapping();
+			nameValueList = utility.getNameValueFromIdentityMapping(this);
 		}
 		return nameValueList.stream()
 				.map(nameString -> getValueFromIdentityMapping(nameString, identity, langCode))
@@ -184,30 +183,7 @@ public class IdentityServiceImpl implements IdentityService {
 				.orElse(""); // Return an empty string if no match is found
 	}
 
-	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
-		if (Objects.isNull(nameValueList)) {
-			try {
-				Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();
-				Map nameMap = (Map) identityMappingMap.get(ResidentConstants.NAME);
-				String nameValue = (String) nameMap.get(ResidentConstants.VALUE);
 
-				if(nameValue.contains(ResidentConstants.COMMA)){
-					nameValueList = List.of(nameValue.split(ResidentConstants.COMMA));
-				} else{
-					nameValueList = List.of(nameValue);
-				}
-			} catch (IOException e) {
-				logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(),
-						"getNameValueFromIdentityMapping",
-						ResidentErrorCode.API_RESOURCE_UNAVAILABLE.getErrorCode() + org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(e));
-				throw new ResidentServiceCheckedException(ResidentErrorCode.POLICY_EXCEPTION.getErrorCode(),
-						ResidentErrorCode.POLICY_EXCEPTION.getErrorMessage(), e);
-			}
-		}
-		return nameValueList;
-	}
-
-	
 	@Override
 	public Map<String, Object> getIdentityAttributes(String id, String schemaType) throws ResidentServiceCheckedException, IOException {
 		return getIdentityAttributes(id, schemaType, List.of(
