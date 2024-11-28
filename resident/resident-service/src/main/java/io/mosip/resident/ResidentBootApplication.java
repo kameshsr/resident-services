@@ -9,7 +9,6 @@ import io.mosip.kernel.pdfgenerator.itext.impl.PDFGeneratorImpl;
 import io.mosip.kernel.templatemanager.velocity.builder.TemplateManagerBuilderImpl;
 import io.mosip.kernel.transliteration.icu4j.impl.TransliterationImpl;
 import io.mosip.kernel.websub.api.client.PublisherClientImpl;
-import io.mosip.kernel.websub.api.client.SubscriberClientImpl;
 import io.mosip.kernel.websub.api.config.publisher.RestTemplateHelper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -43,7 +42,7 @@ import org.springframework.web.client.RestTemplate;
 		DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
 @Import({TokenIDGenerator.class, ValidateTokenUtil.class, CbeffImpl.class, TransliterationService.class, TransliterationServiceUtil.class
 , PDFGeneratorImpl.class, UinValidatorImpl.class, VidValidatorImpl.class, RidValidatorImpl.class, TemplateManagerBuilderImpl.class,
-		SubscriberClientImpl.class, RestTemplateHelper.class, TransliterationImpl.class, PublisherClientImpl.class, IdObjectValidatorConfig.class
+		RestTemplateHelper.class, TransliterationImpl.class, PublisherClientImpl.class, IdObjectValidatorConfig.class
 		, RestTemplate.class, KeyStoreImpl.class})
 public class ResidentBootApplication {
 
