@@ -37,8 +37,7 @@ import org.springframework.web.client.RestTemplate;
 		"io.mosip.kernel.virusscanner.*",
 		"io.mosip.commons.khazana.*",
 		"io.mosip.idrepository.core.util.*",
-		"io.mosip.kernel.authcodeflowproxy.*",
-		"io.mosip.kernel.websub.api.config"}
+		"io.mosip.kernel.authcodeflowproxy.*"}
 )
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
 		DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
