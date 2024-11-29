@@ -71,7 +71,15 @@ public class Config {
 	
 	@Value("${" + ResidentConstants.RESIDENT_REST_TEMPLATE_METRICS_INTERCEPTOR_FILTER_ENABLED + ":false}")
 	private boolean isResidentMetricsInterceptorFilterEnabled;
-	
+
+	@Value("${task.scheduler.pool-size:10}")
+	private int poolSize;
+
+	@Value("${task.scheduler.await-termination-seconds:30}")
+	private int awaitTerminationSeconds;
+
+	@Value("${task.scheduler.wait-for-tasks-to-complete-on-shutdown:true}")
+	private boolean waitForTasksToCompleteOnShutdown;
 
 	@Autowired(required = false)
 	private RestTemplateLoggingInterceptor restTemplateLoggingInterceptor;
@@ -177,6 +185,9 @@ public class Config {
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 		threadPoolTaskScheduler.setPoolSize(5);
 		threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
+		threadPoolTaskScheduler.setPoolSize(poolSize);
+		threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(waitForTasksToCompleteOnShutdown);
+		threadPoolTaskScheduler.setAwaitTerminationSeconds(awaitTerminationSeconds);
 		return threadPoolTaskScheduler;
 	}
 
