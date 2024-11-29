@@ -242,7 +242,7 @@ public class IdentityUtil {
 	}
 
 
-	//@PostConstruct
+	@PostConstruct
 	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
 		if (Objects.isNull(nameValueList)) {
 			try {
