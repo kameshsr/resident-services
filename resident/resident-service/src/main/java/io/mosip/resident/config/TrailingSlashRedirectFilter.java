@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+@author Kamesh Shekhar Prasad
+ */
+
 @Component
 public class TrailingSlashRedirectFilter implements Filter {
 
