@@ -96,6 +96,10 @@ public class BaseWebSubInitializer implements ApplicationListener<ApplicationRea
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         logger.info("onApplicationEvent", "BaseWebSubInitializer", "Application is ready");
         logger.info("Scheduling event subscriptions after (milliseconds): " + taskSubscriptionInitialDelay);
+        taskScheduler.setPoolSize(10); // Adjust based on expected load
+        taskScheduler.setThreadNamePrefix("TaskScheduler-");
+        taskScheduler.setWaitForTasksToCompleteOnShutdown(true);
+        taskScheduler.setAwaitTerminationSeconds(30);
 
         taskScheduler.schedule(() -> {
             try {
