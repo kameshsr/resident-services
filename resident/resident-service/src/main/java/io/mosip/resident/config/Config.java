@@ -183,9 +183,8 @@ public class Config {
 	@Bean
 	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-		threadPoolTaskScheduler.setPoolSize(5);
-		threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
 		threadPoolTaskScheduler.setPoolSize(poolSize);
+		threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
 		threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(waitForTasksToCompleteOnShutdown);
 		threadPoolTaskScheduler.setAwaitTerminationSeconds(awaitTerminationSeconds);
 		return threadPoolTaskScheduler;
