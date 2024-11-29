@@ -136,13 +136,17 @@ public class MosipTestRunner {
 		BaseTestCase.certsForModule = GlobalConstants.RESIDENT;
 		DBManager.executeDBQueries(ResidentConfigManager.getKMDbUrl(), ResidentConfigManager.getKMDbUser(),
 				ResidentConfigManager.getKMDbPass(), ResidentConfigManager.getKMDbSchema(),
-				getGlobalResourcePath() + "/" + "config/keyManagerDataDeleteQueriesForEsignet.txt");
+				getGlobalResourcePath() + "/" + "config/keyManagerCertDataDeleteQueries.txt");
 		DBManager.executeDBQueries(ResidentConfigManager.getIdaDbUrl(), ResidentConfigManager.getIdaDbUser(),
 				ResidentConfigManager.getPMSDbPass(), ResidentConfigManager.getIdaDbSchema(),
-				getGlobalResourcePath() + "/" + "config/idaDeleteQueriesForEsignet.txt");
+				getGlobalResourcePath() + "/" + "config/idaCertDataDeleteQueries.txt");
 		DBManager.executeDBQueries(ResidentConfigManager.getMASTERDbUrl(), ResidentConfigManager.getMasterDbUser(),
 				ResidentConfigManager.getMasterDbPass(), ResidentConfigManager.getMasterDbSchema(),
-				getGlobalResourcePath() + "/" + "config/masterDataDeleteQueriesForEsignet.txt");
+				getGlobalResourcePath() + "/" + "config/masterDataCertDataDeleteQueries.txt");
+
+		DBManager.executeDBQueries(ResidentConfigManager.getIdRepoDbUrl(), ResidentConfigManager.getIdRepoDbUser(),
+				ResidentConfigManager.getPMSDbPass(), "idrepo",
+				getGlobalResourcePath() + "/" + "config/idrepoCertDataDeleteQueries.txt");
 		AdminTestUtil.copyResidentTestResource();
 		BaseTestCase.otpListener = new OTPListener();
 		BaseTestCase.otpListener.run();
