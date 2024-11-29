@@ -90,16 +90,26 @@ public class BaseWebSubInitializer implements ApplicationListener<ApplicationRea
     @Value("${resident.websub.regproc.workflow.complete.secret}")
     private String regProcWorkFlowCompleteSecret;
 
+    @Value("${task.scheduler.pool-size:10}")
+    private int poolSize;
 
+    @Value("${task.scheduler.thread-name-prefix:TaskScheduler-}")
+    private String threadNamePrefix;
+
+    @Value("${task.scheduler.await-termination-seconds:30}")
+    private int awaitTerminationSeconds;
+
+    @Value("${task.scheduler.wait-for-tasks-to-complete-on-shutdown:true}")
+    private boolean waitForTasksToCompleteOnShutdown;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         logger.info("onApplicationEvent", "BaseWebSubInitializer", "Application is ready");
         logger.info("Scheduling event subscriptions after (milliseconds): " + taskSubscriptionInitialDelay);
-        taskScheduler.setPoolSize(10); // Adjust based on expected load
-        taskScheduler.setThreadNamePrefix("TaskScheduler-");
-        taskScheduler.setWaitForTasksToCompleteOnShutdown(true);
-        taskScheduler.setAwaitTerminationSeconds(30);
+        taskScheduler.setPoolSize(poolSize);
+        taskScheduler.setThreadNamePrefix(threadNamePrefix);
+        taskScheduler.setWaitForTasksToCompleteOnShutdown(waitForTasksToCompleteOnShutdown);
+        taskScheduler.setAwaitTerminationSeconds(awaitTerminationSeconds);
 
         taskScheduler.schedule(() -> {
             try {
