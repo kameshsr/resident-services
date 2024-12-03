@@ -43,6 +43,7 @@ import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.IdRepoAppException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.ResidentServiceException;
+import io.mosip.resident.handler.service.ResidentConfigService;
 import io.mosip.resident.helper.ObjectStoreHelper;
 import io.mosip.resident.repository.ResidentTransactionRepository;
 import io.mosip.resident.service.NotificationService;
@@ -231,6 +232,10 @@ public class Utility {
 
 	@Autowired
 	private NotificationService notificationService;
+	private List<String> nameValueList;
+
+	@Autowired
+	private ResidentConfigService residentConfigService;
 
 	@PostConstruct
 	private void loadRegProcessorIdentityJson() {
@@ -1132,4 +1137,34 @@ public class Utility {
 		}
 		return ridDelimeterValue;
 	}
+
+	@CacheEvict(value = "getNameValueFromIdentityMapping", allEntries = true)
+	@Scheduled(fixedRateString = "${resident.cache.expiry.time.millisec.getNameValueFromIdentityMapping}")
+	public void emptyGetNameValueFromIdentityMappingCache() {
+		logger.info("Emptying getNameValueFromIdentityMapping cache");
+	}
+
+	@Cacheable(value = "getNameValueFromIdentityMapping")
+    public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException {
+        if (Objects.isNull(nameValueList)) {
+            try {
+                Map<String, Object> identityMappingMap = residentConfigService.getIdentityMappingMap();
+                Map nameMap = (Map) identityMappingMap.get(ResidentConstants.NAME);
+                String nameValue = (String) nameMap.get(VALUE);
+
+                if(nameValue.contains(ResidentConstants.COMMA)){
+                    nameValueList = List.of(nameValue.split(ResidentConstants.COMMA));
+                } else{
+                    nameValueList = List.of(nameValue);
+                }
+            } catch (IOException e) {
+                logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(),
+                        "getNameValueFromIdentityMapping",
+                        ResidentErrorCode.API_RESOURCE_UNAVAILABLE.getErrorCode() + ExceptionUtils.getStackTrace(e));
+                throw new ResidentServiceCheckedException(ResidentErrorCode.POLICY_EXCEPTION.getErrorCode(),
+                        ResidentErrorCode.POLICY_EXCEPTION.getErrorMessage(), e);
+            }
+        }
+        return nameValueList;
+    }
 }
