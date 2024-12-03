@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import io.mosip.resident.util.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,6 +52,9 @@ public class IdentityController {
 	
 	@Autowired
 	private IdentityService idServiceImpl;
+
+	@Autowired
+	private Utility utility;
 	
 	@Autowired
 	private RequestValidator validator;
@@ -87,7 +91,7 @@ public class IdentityController {
 		ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
 		String id = getIdFromUser();
 		Map<String, Object> propertiesResponse = idServiceImpl.getIdentityAttributes(id, schemaType, List.of());
-		idServiceImpl.getNameValueFromIdentityMapping()
+		utility.getNameValueFromIdentityMapping()
 				.stream()
 				.filter(nameValue -> !propertiesResponse.containsKey(nameValue))
 				.forEach(nameValue -> propertiesResponse.put(

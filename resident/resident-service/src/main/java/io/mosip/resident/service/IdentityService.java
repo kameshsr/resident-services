@@ -71,6 +71,4 @@ public interface IdentityService {
 	public String getResidentIdaTokenFromAccessToken(String accessToken) throws ApisResourceAccessException, ResidentServiceCheckedException;
 
 	public String getAccessToken();
-
-	public List<String> getNameValueFromIdentityMapping() throws ResidentServiceCheckedException;
 }
