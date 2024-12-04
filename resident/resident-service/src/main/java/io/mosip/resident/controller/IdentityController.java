@@ -46,6 +46,7 @@ public class IdentityController {
 	
 	/** The Constant logger. */
 	private static final Logger logger = LoggerConfiguration.logConfig(IdentityController.class);
+	private static final int SIZE = 1;
 
 	/** The audit util. */
 	@Autowired
@@ -95,13 +96,15 @@ public class IdentityController {
 		ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
 		String id = getIdFromUser();
 		Map<String, Object> propertiesResponse = identityUtil.getIdentityAttributes(id, schemaType, List.of());
-		identityUtil.getNameValueFromIdentityMapping()
-				.stream()
-				.filter(nameValue -> !propertiesResponse.containsKey(nameValue))
-				.forEach(nameValue -> propertiesResponse.put(
-						nameValue,
-						((Map<Object, Object>) propertiesResponse.get(IDENTITY)).get(nameValue)
-				));
+		if (identityUtil.getNameValueFromIdentityMapping().size() > SIZE) {
+			identityUtil.getNameValueFromIdentityMapping()
+					.stream()
+					.filter(nameValue -> !propertiesResponse.containsKey(nameValue))
+					.forEach(nameValue -> propertiesResponse.put(
+							nameValue,
+							((Map<Object, Object>) propertiesResponse.get(IDENTITY)).get(nameValue)
+					));
+		}
 
 		propertiesResponse.remove(IDENTITY);
 		auditUtil.setAuditRequestDto(AuditEnum.GET_INPUT_ATTRIBUTES_SUCCESS);
