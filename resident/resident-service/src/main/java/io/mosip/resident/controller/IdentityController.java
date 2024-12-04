@@ -91,17 +91,27 @@ public class IdentityController {
 		}
 		ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
 		String id = getIdFromUser();
-		Map<String, Object> propertiesResponse = idServiceImpl.getIdentityAttributes(id, schemaType, List.of());
-		if (utility.getNameValueFromIdentityMapping().size() > SIZE) {
-			utility.getNameValueFromIdentityMapping()
-					.stream()
-					.filter(nameValue -> !propertiesResponse.containsKey(nameValue))
-					.forEach(nameValue -> propertiesResponse.put(
-							nameValue,
-							((Map<Object, Object>) propertiesResponse.get(IDENTITY)).get(nameValue)
-					));
+        Map<String, Object> propertiesResponse = idServiceImpl.getIdentityAttributes(id, schemaType, List.of());
+		if (propertiesResponse != null) {
+			if (utility != null && utility.getNameValueFromIdentityMapping() != null
+					&& utility.getNameValueFromIdentityMapping().size() > SIZE) {
+				utility.getNameValueFromIdentityMapping()
+						.stream()
+						.filter(nameValue ->
+                                !propertiesResponse.containsKey(nameValue)
+						)
+						.forEach(nameValue -> {
+							Object identityObject = propertiesResponse.get(IDENTITY);
+							if (identityObject instanceof Map) {
+								Map<?, ?> identityMap = (Map<?, ?>) identityObject;
+								if (identityMap.containsKey(nameValue)) {
+									propertiesResponse.put(nameValue, identityMap.get(nameValue));
+								}
+							}
+						});
+			}
+			propertiesResponse.remove(IDENTITY);
 		}
-		propertiesResponse.remove(IDENTITY);
 		auditUtil.setAuditRequestDto(AuditEnum.GET_INPUT_ATTRIBUTES_SUCCESS);
 		logger.debug("IdentityController::getInputAttributeValues()::exit");
 		responseWrapper.setResponse(propertiesResponse);
