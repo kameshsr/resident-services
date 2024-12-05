@@ -4,14 +4,10 @@
 
 # Resident Services
 ## Overview
-This repository contains the source code and design documents for MOSIP Resident Service. For an overview please refer [here](https://docs.mosip.io/1.2.0/modules/resident-services). This module exposes API endpoints for Resident UI (refer [Resident UI github repo](https://github.com/mosip/resident-ui/blob/master/README.md)).
-
+This repository contains the source code and design documents for MOSIP Resident Service. For an overview please refer [here](https://docs.mosip.io/1.2.0/modules/resident-services). This module exposes API endpoints for Resident UI (refer [Resident UI GitHub repo](https://github.com/mosip/resident-ui/blob/master/README.md)).
 
 ## Database
-See [DB guide](db_scripts)
-
-## Config-Server
-To run Resident services, run [Config Server](https://docs.mosip.io/1.2.0/modules/module-configuration#config-server)
+See [DB Scripts](db_scripts)
 
 ## Build & run (for developers)
 The project requires JDK 21.0.3
@@ -21,7 +17,12 @@ and mvn version - 3.9.6
     $ cd resident-service
     $ mvn install -DskipTests=true -Dmaven.javadoc.skip=true -Dgpg.skip=true
     ```
-
+2. Build Docker for a service:
+    ```
+    $ cd <service folder>
+    $ docker build -f Dockerfile
+    ```
+   
 ### Remove the version-specific suffix (PostgreSQL95Dialect) from the Hibernate dialect configuration
    ```
    hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
@@ -34,7 +35,7 @@ This is for better compatibility with future PostgreSQL versions.
    ```
 This is to maintain compatibility with existing ANT-style path patterns.
 
-### Add Below Config in [resident-default.properties](https://github.com/mosip/mosip-config/blob/develop/resident-default.properties)
+### Add Below Config in [resident-default.properties](https://github.com/mosip/mosip-config/blob/master/resident-default.properties)
 ```
 hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 ## Keymanager service
@@ -56,40 +57,45 @@ resident.template.purpose.success.AUTHENTICATION_REQUEST=mosip.event.type.AUTHEN
 resident.template.purpose.failure.AUTHENTICATION_REQUEST=mosip.event.type.AUTHENTICATION_REQUEST
 ```
 
-### Update below config in [resident-default.properties](https://github.com/mosip/mosip-config/blob/develop/resident-default.properties)
+### Update below config in [resident-default.properties](https://github.com/mosip/mosip-config/blob/master/resident-default.properties)
 ### The exclusion list of URL patterns that should not be part of authentication and authorization
 ```
 mosip.service.end-points=/**/req/otp,/**/proxy/**,/**/validate-otp,/**/channel/verification-status/**,/**/req/credential/**,/**/req/card/*,/**/req/auth-history,/**/rid/check-status,/**/req/auth-lock,/**/req/auth-unlock,/**/req/update-uin,/**/req/print-uin,/**/req/euin,/**/credential/types,/**/req/policy/**,/**/aid/status,/**/individualId/otp,/**/mock/**,/**/callback/**,/**/download-card,/**/download/registration-centers-list/**,/**/download/supporting-documents/**,/**/vid/policy,/**/vid,/vid/**,/**/download/nearestRegistrationcenters/**,/**/authorize/admin/validateToken,/**/logout/user,/**/aid-stage/**
 ```
 
-1. Build Docker for a service:
-    ```
-    $ cd <service folder>
-    $ docker build -f Dockerfile
-    ```
-
-### Add Below jars in a class-path to run a services
-   ```
-   <dependency>
-       <groupId>io.mosip.kernel</groupId>
-       <artifactId>kernel-auth-adapter</artifactId>
-       <version>${kernel.auth.adapter.version}</version>
-   </dependency>
-   <dependency>
-       <groupId>io.mosip.kernel</groupId>
-       <artifactId>kernel-ref-idobjectvalidator</artifactId>
-       <version>${kernel-ref-idobjectvalidator.version}</version>
-   </dependency>
-   ```
-
-## Deploy
-To deploy Commons services on Kubernetes cluster using Dockers refer to [Sandbox Deployment](https://docs.mosip.io/1.2.0/deployment/sandbox-deployment).
-
 ## Configuration
-[resident-default.properties](https://github.com/mosip/mosip-config/blob/develop/resident-default.properties)
+[resident-default.properties](https://github.com/mosip/mosip-config/blob/master/resident-default.properties)
 
-[application-default.properties](https://github.com/mosip/mosip-config/blob/develop/application-default.properties)
+[application-default.properties](https://github.com/mosip/mosip-config/blob/master/application-default.properties)
 defined here.
+
+## Config-Server
+To run Resident services, run [Config Server](https://docs.mosip.io/1.2.0/modules/module-configuration#config-server)
+
+## Default context, path, port
+Refer to [bootstrap properties](resident/resident-service/src/main/resources/bootstrap.properties)
+
+## Deployment in K8 cluster with other MOSIP services:
+### Pre-requisites
+* Set KUBECONFIG variable to point to existing K8 cluster kubeconfig file:
+    ```
+    export KUBECONFIG=~/.kube/<k8s-cluster.config>
+    ```
+### Install
+  ```
+    $ cd deploy
+    $ ./install.sh
+   ```
+### Delete
+  ```
+    $ cd deploy
+    $ ./delete.sh
+   ```
+### Restart
+  ```
+    $ cd deploy
+    $ ./restart.sh
+   ```
 
 ## Test
 Automated functional tests available in [Functional Tests repo](api-test).
