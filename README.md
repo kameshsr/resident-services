@@ -15,7 +15,7 @@ and mvn version - 3.9.6
 1. Build and install:
     ```
     $ cd resident-service
-    $ mvn install -DskipTests=true -Dmaven.javadoc.skip=true -Dgpg.skip=true
+    $ mvn install -Dgpg.skip=true
     ```
 2. Build Docker for a service:
     ```
