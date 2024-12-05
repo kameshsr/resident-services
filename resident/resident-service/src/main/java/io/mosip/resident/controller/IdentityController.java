@@ -96,14 +96,20 @@ public class IdentityController {
 		ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
 		String id = getIdFromUser();
 		Map<String, Object> propertiesResponse = identityUtil.getIdentityAttributes(id, schemaType, List.of());
-		if (identityUtil.getNameValueFromIdentityMapping().size() > SIZE) {
-			identityUtil.getNameValueFromIdentityMapping()
+		List<String> nameValueList = identityUtil.getNameValueFromIdentityMapping();
+		if (nameValueList.size() > SIZE) {
+			nameValueList
 					.stream()
 					.filter(nameValue -> !propertiesResponse.containsKey(nameValue))
 					.forEach(nameValue -> propertiesResponse.put(
 							nameValue,
 							((Map<Object, Object>) propertiesResponse.get(IDENTITY)).get(nameValue)
 					));
+		} else{
+			if(!nameValueList.isEmpty() && !propertiesResponse.containsKey(nameValueList.getFirst())){
+				propertiesResponse.put(nameValueList.getFirst(),
+						((Map<Object, Object>) propertiesResponse.get(IDENTITY)).get(nameValueList.getFirst()));
+			}
 		}
 
 		propertiesResponse.remove(IDENTITY);
