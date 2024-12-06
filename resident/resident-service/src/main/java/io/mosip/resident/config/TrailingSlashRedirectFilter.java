@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+@author Kamesh Shekhar Prasad
+ */
+
 @Component
 public class TrailingSlashRedirectFilter implements Filter {
 
@@ -16,9 +20,7 @@ public class TrailingSlashRedirectFilter implements Filter {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String path = httpRequest.getRequestURI();
-
-        // For other types of requests, handle the trailing slash redirection
-        if (path.endsWith("/")) {
+        if (path.endsWith("/") && !path.endsWith("status/")) {
             String newPath = path.substring(0, path.length() - 1);
             HttpServletRequest newRequest = new CustomHttpServletRequestWrapper(httpRequest, newPath);
             chain.doFilter(newRequest, response);
