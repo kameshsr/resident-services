@@ -1,6 +1,8 @@
 package io.mosip.resident.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.mosip.kernel.core.exception.ServiceError;
+import io.mosip.resident.constant.ResidentErrorCode;
 import io.mosip.resident.dto.ResponseWrapper;
 import io.mosip.resident.exception.ApisResourceAccessException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
@@ -140,6 +142,22 @@ public class PerpetualVidUtilTest {
         assertThrows(ApisResourceAccessException.class, () -> {
             perpetualVidUtil.retrieveVidsfromUin(uin, timeZoneOffset, locale);
         });
+    }
+
+    @Test
+    public void testRetrieveVidsfromUin_EmtpyArray() throws ApisResourceAccessException, ResidentServiceCheckedException {
+        String uin = "123456789012";
+        int timeZoneOffset = 0;
+        String locale = "en";
+
+        ResponseWrapper<List<Map<String, ?>>> responseWrapper = new ResponseWrapper<>();
+        responseWrapper.setErrors(List.of(new ServiceError(ResidentErrorCode.NO_RECORDS_FOUND.getErrorCode(),
+                ResidentErrorCode.NO_RECORDS_FOUND.getErrorMessage())));
+
+        when(residentServiceRestClient.getApi(anyString(), eq(ResponseWrapper.class))).thenReturn(responseWrapper);
+        ResponseWrapper<List<Map<String, ?>>> result = perpetualVidUtil.retrieveVidsfromUin(uin, timeZoneOffset, locale);
+        assertNotNull(result);
+        assertEquals(0, result.getResponse().size());
     }
 }
 
