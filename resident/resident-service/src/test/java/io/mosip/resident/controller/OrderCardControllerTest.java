@@ -169,4 +169,31 @@ public class OrderCardControllerTest {
                 "/physical-card/order-redirect?redirectUrl=aHR0cHM6Ly93d3cubWFkZWludGV4dC5jb20v&paymentTransactionId=12345dsvdvds&eventId=123456&residentFullAddress=fgfhfghgf")).andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void testPhysicalCardOrderRedirectFailureUrlEmpty() throws Exception {
+        Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn("https://resident.dev2.mosip.net/");
+        Mockito.when(orderCardService.physicalCardOrder(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("");
+        mockMvc.perform(MockMvcRequestBuilders.get(
+                "/physical-card/order-redirect?redirectUrl=aHR0cHM6Ly93d3cubWFkZWludGV4dC5jb20v&paymentTransactionId=12345dsvdvds&eventId=123456&residentFullAddress=fgfhfghgf")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testPhysicalCardOrderRedirectFailureUrlNull() throws Exception {
+        Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn("https://resident.dev2.mosip.net/");
+        Mockito.when(orderCardService.physicalCardOrder(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
+        mockMvc.perform(MockMvcRequestBuilders.get(
+                "/physical-card/order-redirect?redirectUrl=aHR0cHM6Ly93d3cubWFkZWludGV4dC5jb20v&paymentTransactionId=12345dsvdvds&eventId=123456&residentFullAddress=fgfhfghgf")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testPhysicalCardOrderRedirectFailureUrlInvalidUrl() throws Exception {
+        Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn("https://resident.dev2.mosip.net/");
+        Mockito.when(orderCardService.physicalCardOrder(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("https://resident.dev1.mosip.net /");
+        mockMvc.perform(MockMvcRequestBuilders.get(
+                "/physical-card/order-redirect?redirectUrl=aHR0cHM6Ly93d3cubWFkZWludGV4dC5jb20v&paymentTransactionId=12345dsvdvds&eventId=123456&residentFullAddress=fgfhfghgf")).andExpect(status().isBadRequest());
+    }
+
 }
