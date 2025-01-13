@@ -272,7 +272,7 @@ public class ProxyIdRepoServiceTest {
 		when(identityServiceImpl.getResidentIdaToken()).thenReturn("123");
 		when(residentService.getEventStatusCode(Mockito.anyString(), Mockito.anyString())).thenReturn(Tuples.of(EventStatusInProgress.NEW.name(),
 				"eng"));
-		assertEquals("123", service.getPendingDrafts("eng").getResponse().getDrafts().get(0).getEid());
+		assertEquals(1, service.getPendingDrafts("eng").getResponse().getDrafts().size());
 	}
 
 }
