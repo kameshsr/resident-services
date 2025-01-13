@@ -240,4 +240,39 @@ public class ProxyIdRepoServiceTest {
 		assertEquals("123", service.getPendingDrafts("eng").getResponse().getDrafts().get(0).getEid());
 	}
 
+	@Test
+	public void testGetPendingDraftsSuccessWithPendingDraftEmptyValue() throws ResidentServiceCheckedException, ApisResourceAccessException {
+		ResponseWrapper<DraftResponseDto> responseWrapper = new ResponseWrapper<>();
+		DraftResponseDto draftResponseDto = new DraftResponseDto();
+		DraftUinResponseDto draftUinResponseDto = new DraftUinResponseDto();
+		draftUinResponseDto.setAttributes(List.of("PHONE"));
+		draftUinResponseDto.setRid("123");
+		draftUinResponseDto.setCreatedDTimes(LocalDateTime.now().toString());
+		draftResponseDto.setDrafts(List.of(draftUinResponseDto));
+		responseWrapper.setResponse(draftResponseDto);
+		ResidentTransactionEntity residentTransactionEntity = new ResidentTransactionEntity();
+		residentTransactionEntity.setStatusCode(EventStatusInProgress.NEW.name());
+		residentTransactionEntity.setRequestTypeCode(RequestType.UPDATE_MY_UIN.name());
+		residentTransactionEntity.setEventId("123");
+
+		ResidentTransactionEntity residentTransactionEntity1 = new ResidentTransactionEntity();
+		residentTransactionEntity1.setStatusCode(EventStatusInProgress.NEW.name());
+		residentTransactionEntity1.setRequestTypeCode(RequestType.UPDATE_MY_UIN.name());
+		residentTransactionEntity1.setEventId("1234");
+
+		when(identityServiceImpl.getResidentIndvidualIdFromSession()).thenReturn("123");
+		when(identityServiceImpl.getUinForIndividualId(Mockito.anyString())).thenReturn("123");
+		when(environment.getProperty(Mockito.anyString())).thenReturn("id");
+		when(residentServiceRestClient.getApi(any(), (Map<String, String>) any(), any())).thenReturn(responseWrapper);
+		when(objectMapper.convertValue((Object) any(), (Class<Object>) any())).thenReturn(draftResponseDto);
+		when(residentTransactionRepository.findTopByAidOrderByCrDtimesDesc(Mockito.anyString())).thenReturn(null);
+		when(residentTransactionRepository.findByTokenIdAndRequestTypeCodeAndStatusCode(Mockito.anyString()
+				, Mockito.anyString(), Mockito.anyString())).thenReturn(List.of(residentTransactionEntity, residentTransactionEntity1));
+		when(utility.createEntity(any())).thenReturn(residentTransactionEntity);
+		when(identityServiceImpl.getResidentIdaToken()).thenReturn("123");
+		when(residentService.getEventStatusCode(Mockito.anyString(), Mockito.anyString())).thenReturn(Tuples.of(EventStatusInProgress.NEW.name(),
+				"eng"));
+		assertEquals("123", service.getPendingDrafts("eng").getResponse().getDrafts().get(0).getEid());
+	}
+
 }
