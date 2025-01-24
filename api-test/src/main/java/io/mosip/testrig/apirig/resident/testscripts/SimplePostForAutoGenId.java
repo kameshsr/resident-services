@@ -99,12 +99,12 @@ public class SimplePostForAutoGenId extends AdminTestUtil implements ITest {
 				throw new SkipException(GlobalConstants.VID_FEATURE_NOT_SUPPORTED);
 			}
 		}
-
-		testCaseName = isTestCaseValidForExecution(testCaseDTO);
 		String[] templateFields = testCaseDTO.getTemplateFields();
 		String inputJson = "";
 
 		inputJson = getJsonFromTemplate(testCaseDTO.getInput(), testCaseDTO.getInputTemplate());
+		
+		inputJson = ResidentUtil.inputstringKeyWordHandeler(inputJson, testCaseName);
 
 		String outputJson = getJsonFromTemplate(testCaseDTO.getOutput(), testCaseDTO.getOutputTemplate());
 

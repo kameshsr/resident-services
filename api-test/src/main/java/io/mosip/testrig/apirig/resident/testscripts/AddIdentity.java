@@ -98,9 +98,6 @@ public class AddIdentity extends AdminTestUtil implements ITest {
 								MediaType.APPLICATION_JSON, COOKIENAME,
 								new KernelAuthentication().getTokenByRole(testCaseDTO.getRole())).asString(),
 						"response.uin");
-
-		testCaseName = isTestCaseValidForExecution(testCaseDTO);
-
 		DateFormat dateFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		Calendar cal = Calendar.getInstance();
 		String timestampValue = dateFormatter.format(cal.getTime());

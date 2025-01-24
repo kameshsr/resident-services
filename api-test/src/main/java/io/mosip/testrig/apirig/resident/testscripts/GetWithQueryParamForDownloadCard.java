@@ -84,7 +84,6 @@ public class GetWithQueryParamForDownloadCard extends AdminTestUtil implements I
 	public void test(TestCaseDTO testCaseDTO) throws Exception {
 		testCaseName = testCaseDTO.getTestCaseName();
 		testCaseName = ResidentUtil.isTestCaseValidForExecution(testCaseDTO);
-		testCaseName = isTestCaseValidForExecution(testCaseDTO);
 		if (HealthChecker.signalTerminateExecution) {
 			throw new SkipException(GlobalConstants.TARGET_ENV_HEALTH_CHECK_FAILED + HealthChecker.healthCheckFailureMapS);
 		}
