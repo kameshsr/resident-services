@@ -13,7 +13,7 @@
     <name>resident-service</name>
     <version>1.3.0-SNAPSHOT</version>
     <properties>
-        <commons.packet.manager.version>1.3.0-SNAPSHOT</commons.packet.manager.version>
+        <commons.packet.manager.version>1.3.0-beta.1</commons.packet.manager.version>
         <kernel.core.version>1.3.0-SNAPSHOT</kernel.core.version>
         <kernel.virusscanner.clamav.version>1.3.0-SNAPSHOT</kernel.virusscanner.clamav.version>
         <kernel-keymanager-service.version>1.3.0-beta.1</kernel-keymanager-service.version>
