@@ -2,7 +2,6 @@ package io.mosip.resident.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itextpdf.text.pdf.PdfReader;
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.exception.ServiceError;
 import io.mosip.kernel.core.http.ResponseWrapper;
@@ -25,8 +24,8 @@ import io.mosip.resident.exception.IdRepoAppException;
 import io.mosip.resident.exception.IndividualIdNotFoundException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.VidCreationException;
-import io.mosip.resident.service.IdentityService;
 import lombok.Data;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.assertj.core.util.Lists;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,6 +37,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import jakarta.annotation.PostConstruct;
+
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -419,10 +420,10 @@ public class Utilities {
 	}
 
 	public int getTotalNumberOfPageInPdf(ByteArrayOutputStream outputStream) throws IOException {
-		PdfReader pdfReader = new PdfReader(outputStream.toByteArray());
-		return pdfReader.getNumberOfPages();
+		try (PDDocument document = PDDocument.load(new ByteArrayInputStream(outputStream.toByteArray()))) {
+			return document.getNumberOfPages();
+		}
 	}
-
 	@PostConstruct
 	public void initializeSecureRandomInstance(){
 		secureRandom = new SecureRandom();
