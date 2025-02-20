@@ -25,7 +25,13 @@ import io.mosip.resident.exception.IndividualIdNotFoundException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.VidCreationException;
 import lombok.Data;
+import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.io.RandomAccessBuffer;
+import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.assertj.core.util.Lists;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,9 +44,7 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.annotation.PostConstruct;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
@@ -81,6 +85,8 @@ public class Utilities {
 	/** The Constant FILE_SEPARATOR. */
 	public static final String FILE_SEPARATOR = "\\";
 
+	private static final long SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB threshold
+
 	@Value("${provider.packetwriter.resident}")
 	private String provider;
 
@@ -107,17 +113,17 @@ public class Utilities {
 
 	private String mappingJsonString = null;
 
-    private static String regProcessorIdentityJson = "";
+	private static String regProcessorIdentityJson = "";
 	private SecureRandom secureRandom;
 
 	@PostConstruct
-    private void loadRegProcessorIdentityJson() {
-        regProcessorIdentityJson = residentRestTemplate.getForObject(configServerFileStorageURL + residentIdentityJson, String.class);
-        logger.info(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
-                LoggerFileConstant.APPLICATIONID.toString(), "loadRegProcessorIdentityJson completed successfully");
-    }
+	private void loadRegProcessorIdentityJson() {
+		regProcessorIdentityJson = residentRestTemplate.getForObject(configServerFileStorageURL + residentIdentityJson, String.class);
+		logger.info(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
+				LoggerFileConstant.APPLICATIONID.toString(), "loadRegProcessorIdentityJson completed successfully");
+	}
 
-    public JSONObject retrieveIdrepoJson(String uin) throws ApisResourceAccessException, IdRepoAppException, IOException {
+	public JSONObject retrieveIdrepoJson(String uin) throws ApisResourceAccessException, IdRepoAppException, IOException {
 
 		if (uin != null) {
 			logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.UIN.toString(), "",
@@ -295,11 +301,11 @@ public class Utilities {
 	}
 
 	public String getJson(String configServerFileStorageURL, String uri) {
-        if (StringUtils.isBlank(regProcessorIdentityJson)) {
-            return residentRestTemplate.getForObject(configServerFileStorageURL + uri, String.class);
-        }
-        return regProcessorIdentityJson;
-    }
+		if (StringUtils.isBlank(regProcessorIdentityJson)) {
+			return residentRestTemplate.getForObject(configServerFileStorageURL + uri, String.class);
+		}
+		return regProcessorIdentityJson;
+	}
 
 	public String retrieveIdrepoJsonStatus(String uin) throws ApisResourceAccessException, IdRepoAppException, IOException {
 		String response = null;
@@ -396,22 +402,22 @@ public class Utilities {
 		}
 		return langCode;
 	}
-	
-	    
-    public String getPhoneAttribute() throws ResidentServiceCheckedException {
-    	return getIdMappingAttributeForKey(MappingJsonConstants.PHONE);
-    }
-    
-    public String getEmailAttribute() throws ResidentServiceCheckedException {
-    	return getIdMappingAttributeForKey(MappingJsonConstants.EMAIL);
-    }
+
+
+	public String getPhoneAttribute() throws ResidentServiceCheckedException {
+		return getIdMappingAttributeForKey(MappingJsonConstants.PHONE);
+	}
+
+	public String getEmailAttribute() throws ResidentServiceCheckedException {
+		return getIdMappingAttributeForKey(MappingJsonConstants.EMAIL);
+	}
 
 	private String getIdMappingAttributeForKey(String attributeKey) throws ResidentServiceCheckedException {
 		try {
 			JSONObject regProcessorIdentityJson = getRegistrationProcessorMappingJson();
 			String phoneAttribute = JsonUtil.getJSONValue(
-			        JsonUtil.getJSONObject(regProcessorIdentityJson, attributeKey),
-			        MappingJsonConstants.VALUE);
+					JsonUtil.getJSONObject(regProcessorIdentityJson, attributeKey),
+					MappingJsonConstants.VALUE);
 			return phoneAttribute;
 		} catch (IOException e) {
 			throw new ResidentServiceCheckedException(ResidentErrorCode.IO_EXCEPTION.getErrorCode(),
@@ -419,8 +425,31 @@ public class Utilities {
 		}
 	}
 
-	public int getTotalNumberOfPageInPdf(ByteArrayOutputStream outputStream) throws IOException {
-		try (PDDocument document = PDDocument.load(new ByteArrayInputStream(outputStream.toByteArray()))) {
+	public static int getTotalNumberOfPageInPdf(ByteArrayOutputStream outputStream) throws IOException {
+		byte[] pdfBytes = outputStream.toByteArray();
+		int size = pdfBytes.length;
+		if (size <= SIZE_THRESHOLD) {
+			return getPageCountWithRandomAccessBuffer(outputStream);
+		} else {
+			return getPageCountWithPDDocument(pdfBytes);
+		}
+	}
+
+	private static int getPageCountWithRandomAccessBuffer(ByteArrayOutputStream outputStream) throws IOException {
+		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+			 RandomAccessBuffer buffer = new RandomAccessBuffer(inputStream)) {
+			PDFParser parser = new PDFParser(buffer);
+			parser.parse();
+			try (COSDocument cosDocument = parser.getDocument();
+				 PDDocument document = new PDDocument(cosDocument)) {  // Use PDDocument here for page count
+				return document.getNumberOfPages();
+			}
+		}
+	}
+
+	private static int getPageCountWithPDDocument(byte[] pdfBytes) throws IOException {
+		try (InputStream inputStream = new ByteArrayInputStream(pdfBytes);
+			 PDDocument document = PDDocument.load(inputStream, MemoryUsageSetting.setupTempFileOnly())) {
 			return document.getNumberOfPages();
 		}
 	}
