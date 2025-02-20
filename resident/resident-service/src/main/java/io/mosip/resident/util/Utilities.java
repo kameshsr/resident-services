@@ -425,7 +425,7 @@ public class Utilities {
 		}
 	}
 
-	public static int getTotalNumberOfPageInPdf(ByteArrayOutputStream outputStream) throws IOException {
+	public int getTotalNumberOfPageInPdf(ByteArrayOutputStream outputStream) throws IOException {
 		byte[] pdfBytes = outputStream.toByteArray();
 		int size = pdfBytes.length;
 		if (size <= SIZE_THRESHOLD) {
