@@ -25,13 +25,8 @@ import io.mosip.resident.exception.IndividualIdNotFoundException;
 import io.mosip.resident.exception.ResidentServiceCheckedException;
 import io.mosip.resident.exception.VidCreationException;
 import lombok.Data;
-import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.MemoryUsageSetting;
-import org.apache.pdfbox.io.RandomAccessBuffer;
-import org.apache.pdfbox.io.RandomAccessRead;
-import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.assertj.core.util.Lists;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -427,24 +422,7 @@ public class Utilities {
 
 	public int getTotalNumberOfPageInPdf(ByteArrayOutputStream outputStream) throws IOException {
 		byte[] pdfBytes = outputStream.toByteArray();
-		int size = pdfBytes.length;
-		if (size <= SIZE_THRESHOLD) {
-			return getPageCountWithRandomAccessBuffer(outputStream);
-		} else {
-			return getPageCountWithPDDocument(pdfBytes);
-		}
-	}
-
-	private static int getPageCountWithRandomAccessBuffer(ByteArrayOutputStream outputStream) throws IOException {
-		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-			 RandomAccessBuffer buffer = new RandomAccessBuffer(inputStream)) {
-			PDFParser parser = new PDFParser(buffer);
-			parser.parse();
-			try (COSDocument cosDocument = parser.getDocument();
-				 PDDocument document = new PDDocument(cosDocument)) {  // Use PDDocument here for page count
-				return document.getNumberOfPages();
-			}
-		}
+		return getPageCountWithPDDocument(pdfBytes);
 	}
 
 	private static int getPageCountWithPDDocument(byte[] pdfBytes) throws IOException {
