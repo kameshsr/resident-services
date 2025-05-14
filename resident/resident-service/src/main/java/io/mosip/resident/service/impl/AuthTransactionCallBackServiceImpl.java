@@ -3,6 +3,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import io.mosip.resident.dto.AuthTransactionCallbackRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,11 +52,11 @@ public class AuthTransactionCallBackServiceImpl implements AuthTransactionCallBa
 	private Utility utility;
 
     @Override
-    public void updateAuthTransactionCallBackService(Map<String, Object> eventModel) throws ResidentServiceCheckedException, ApisResourceAccessException, NoSuchAlgorithmException {
+    public void updateAuthTransactionCallBackService(AuthTransactionCallbackRequestDto authTransactionCallbackRequestDto) throws ResidentServiceCheckedException, ApisResourceAccessException, NoSuchAlgorithmException {
         logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
                 LoggerFileConstant.APPLICATIONID.toString(), "AuthTransactionCallbackServiceImpl::updateAuthTransactionCallBackService()::entry");
         try {
-            insertInResidentTransactionTable(eventModel, null);
+            insertInResidentTransactionTable(authTransactionCallbackRequestDto, null);
         } catch (Exception e) {
             logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
                     LoggerFileConstant.APPLICATIONID.toString(), "AuthTransactionCallbackServiceImpl::updateAuthTransactionCallBackService()::exception");
