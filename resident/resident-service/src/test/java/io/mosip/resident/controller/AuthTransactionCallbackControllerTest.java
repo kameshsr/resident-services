@@ -130,7 +130,7 @@ public class AuthTransactionCallbackControllerTest {
 
     @Test
     public void testCreateRequestGenerationSuccess() throws Exception {
-        authTransactionCallbackController.authTransactionCallback(objectMapper.convertValue(eventModel, Map.class));
+        authTransactionCallbackController.authTransactionCallback(eventModel);
         mockMvc.perform((MockMvcRequestBuilders.post("/callback/authTransaction"))
                 .contentType(MediaType.APPLICATION_JSON).content(eventModel.toString())).andReturn();
         verify(authTransactionCallBackService).updateAuthTransactionCallBackService(any());
@@ -140,7 +140,7 @@ public class AuthTransactionCallbackControllerTest {
     public void testCreateRequestGenerationFailure() throws Exception {
         doThrow(new ResidentServiceCheckedException("error", "Error message")).when(authTransactionCallBackService)
                 .updateAuthTransactionCallBackService(any());
-        authTransactionCallbackController.authTransactionCallback(objectMapper.convertValue(eventModel, Map.class));
+        authTransactionCallbackController.authTransactionCallback(eventModel);
         mockMvc.perform((MockMvcRequestBuilders.post("/callback/authTransaction"))
                 .contentType(MediaType.APPLICATION_JSON).content(eventModel.toString())).andReturn();
         verify(authTransactionCallBackService).updateAuthTransactionCallBackService(any());

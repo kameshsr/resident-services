@@ -96,14 +96,14 @@ public class AuthTransactionCallbackServiceTest {
 
     @Test
     public void testAuthTransactionCallBackService() throws ResidentServiceCheckedException, ApisResourceAccessException, NoSuchAlgorithmException {
-        authTransactionCallBackService.updateAuthTransactionCallBackService(objectMapper.convertValue(eventModel, Map.class));
+        authTransactionCallBackService.updateAuthTransactionCallBackService(eventModel);
         authTransactionCallBackService = mock(AuthTransactionCallBackServiceImpl.class);
         Mockito.lenient().doNothing().when(authTransactionCallBackService).updateAuthTransactionCallBackService(Mockito.any());
     }
 
     @Test
     public void testAuthTransactionCallBackServiceException() throws ResidentServiceCheckedException, ApisResourceAccessException, NoSuchAlgorithmException {
-        authTransactionCallBackService.updateAuthTransactionCallBackService(objectMapper.convertValue(eventModel, Map.class));
+        authTransactionCallBackService.updateAuthTransactionCallBackService(eventModel);
         authTransactionCallBackService = mock(AuthTransactionCallBackServiceImpl.class);
         Mockito.lenient().doThrow(ResidentServiceCheckedException.class).when(authTransactionCallBackService).updateAuthTransactionCallBackService(Mockito.any());
     }

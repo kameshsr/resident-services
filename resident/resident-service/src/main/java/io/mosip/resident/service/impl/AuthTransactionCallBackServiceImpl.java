@@ -3,7 +3,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import io.mosip.resident.dto.AuthTransactionCallbackRequestDto;
+import io.mosip.kernel.core.websub.model.EventModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,11 +52,11 @@ public class AuthTransactionCallBackServiceImpl implements AuthTransactionCallBa
 	private Utility utility;
 
     @Override
-    public void updateAuthTransactionCallBackService(AuthTransactionCallbackRequestDto authTransactionCallbackRequestDto) throws ResidentServiceCheckedException, ApisResourceAccessException, NoSuchAlgorithmException {
+    public void updateAuthTransactionCallBackService(EventModel eventModel) throws ResidentServiceCheckedException, ApisResourceAccessException, NoSuchAlgorithmException {
         logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
                 LoggerFileConstant.APPLICATIONID.toString(), "AuthTransactionCallbackServiceImpl::updateAuthTransactionCallBackService()::entry");
         try {
-            insertInResidentTransactionTable(authTransactionCallbackRequestDto, null);
+            insertInResidentTransactionTable(eventModel, null);
         } catch (Exception e) {
             logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
                     LoggerFileConstant.APPLICATIONID.toString(), "AuthTransactionCallbackServiceImpl::updateAuthTransactionCallBackService()::exception");
@@ -66,10 +66,10 @@ public class AuthTransactionCallBackServiceImpl implements AuthTransactionCallBa
         }
     }
 
-    private void insertInResidentTransactionTable(Map<String, Object> eventModel, String status) throws ApisResourceAccessException, NoSuchAlgorithmException {
+    private void insertInResidentTransactionTable(EventModel eventModel, String status) throws ApisResourceAccessException, NoSuchAlgorithmException {
         logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
                 LoggerFileConstant.APPLICATIONID.toString(), "AuthTransactionCallbackServiceImpl::insertInResidentTransactionTable()::entry");
-        Object eventObj = eventModel.get(ResidentConstants.EVENT);
+        Object eventObj = eventModel.getEvent();
 		if (eventObj instanceof Map) {
 			Map<String, Object> eventMap = (Map<String, Object>) eventObj;
 			Object dataObject = eventMap.get(ResidentConstants.DATA);

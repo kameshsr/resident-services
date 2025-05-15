@@ -4,9 +4,8 @@ import static io.mosip.resident.constant.ResidentConstants.API_RESPONSE_TIME_DES
 import static io.mosip.resident.constant.ResidentConstants.API_RESPONSE_TIME_ID;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 
-import io.mosip.resident.dto.AuthTransactionCallbackRequestDto;
+import io.mosip.kernel.core.websub.model.EventModel;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,13 +63,13 @@ public class AuthTransactionCallbackController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(hidden = true)))})
 
     @PreAuthenticateContentAndVerifyIntent(secret = "${resident.websub.authTransaction-status.secret}", callback = "${resident.websub.callback.authTransaction-status.relative.url}", topic = "${resident.websub.authTransaction-status.topic}")
-	public void authTransactionCallback(@Valid @RequestBody AuthTransactionCallbackRequestDto authTransactionCallbackRequestDto)
+	public void authTransactionCallback(@Valid @RequestBody EventModel eventModel)
 			throws ApisResourceAccessException, NoSuchAlgorithmException {
 		try {
 			logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.APPLICATIONID.toString(),
 					LoggerFileConstant.APPLICATIONID.toString(),
 					"AuthTransactionCallbackController :: authTransactionCallback() :: entry");
-			authTransactionCallBackService.updateAuthTransactionCallBackService(authTransactionCallbackRequestDto);
+			authTransactionCallBackService.updateAuthTransactionCallBackService(eventModel);
 			auditUtil.setAuditRequestDto(AuditEnum.AUTH_TYPE_CALL_BACK_SUCCESS);
 			logger.debug("AuthTransactionCallbackController::authTransactionCallback()::exit");
 		} catch (ResidentServiceCheckedException e) {
