@@ -3,11 +3,14 @@ package io.mosip.resident.interceptor;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.codec.binary.Base64;
+import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
+import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,12 +49,14 @@ public class ResidentEntityInterceptor implements Interceptor, Serializable {
 	/** The mosip logger. */
 	private static final Logger logger = LoggerConfiguration.logConfig(ResidentEntityInterceptor.class);
 
-	@Override
-	public boolean onSave(Object entity, Object id, Object[] state, String[] propertyNames, Type[] types) {
+	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
 		try {
 			if (entity instanceof ResidentTransactionEntity) {
-				List<String> propertyNamesList = Arrays.asList(propertyNames);
-				encryptDataOnSave(id, state, propertyNamesList, types, (ResidentTransactionEntity) entity);
+				if (((ResidentTransactionEntity) entity).getIndividualId() != null) {
+					List<String> propertyNamesList = Arrays.asList(propertyNames);
+					encryptDataOnSave(id, state, propertyNamesList, types, (ResidentTransactionEntity) entity);
+					return true;
+				}
 			}
 		} catch (ResidentServiceException e) {
 			logger.error(ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorCode(),
@@ -59,7 +64,7 @@ public class ResidentEntityInterceptor implements Interceptor, Serializable {
 			throw new ResidentServiceException(ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorCode(),
 					ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorMessage(), e);
 		}
-		return Interceptor.super.onSave(entity, id, state, propertyNames, types);
+		return false;
 	}
 
 	private <T extends ResidentTransactionEntity> void encryptDataOnSave(Object id, Object[] state,
@@ -73,32 +78,27 @@ public class ResidentEntityInterceptor implements Interceptor, Serializable {
 		}
 	}
 	
-	@Override
-	public boolean onLoad(Object entity, Object id, Object[] state, String[] propertyNames, Type[] types) {
-		try {
-			if (entity instanceof ResidentTransactionEntity) {
-				List<String> propertyNamesList = Arrays.asList(propertyNames);
-				int indexOfData = propertyNamesList.indexOf(INDIVIDUAL_ID);
-				if (Objects.nonNull(state[indexOfData])) {
-					decryptDataOnLoad(id, state, propertyNamesList, types, (ResidentTransactionEntity) entity);
-				}
+	public boolean onLoad(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
+		if (entity instanceof ResidentTransactionEntity) {
+			List<String> propertyNamesList = Arrays.asList(propertyNames);
+			int indexOfData = propertyNamesList.indexOf(INDIVIDUAL_ID);
+			if (Objects.nonNull(state[indexOfData])) {
+				decryptDataOnLoad(id, state, propertyNamesList, types, (ResidentTransactionEntity) entity);
+				return true;
 			}
-		} catch (ResidentServiceException e) {
-			logger.error(ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorCode(),
-					ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorMessage(), e);
-			throw new ResidentServiceException(ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorCode(),
-					ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorMessage(), e);
 		}
-		return Interceptor.super.onLoad(entity, id, state, propertyNames, types);
+		return false;
 	}
 
-	@Override
-	public boolean onFlushDirty(Object entity, Object id, Object[] currentState, Object[] previousState, String[] propertyNames, Type[] types) {
-		if(entity instanceof ResidentTransactionEntity) {
-			List<String> propertyNamesList = Arrays.asList(propertyNames);
-			encryptDataOnSave(id, currentState, propertyNamesList, types, (ResidentTransactionEntity) entity);
+	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState, String[] propertyNames, Type[] types) {
+		if (entity instanceof ResidentTransactionEntity) {
+			if (((ResidentTransactionEntity) entity).getIndividualId() != null) {
+				List<String> propertyNamesList = Arrays.asList(propertyNames);
+				encryptDataOnSave(id, currentState, propertyNamesList, types, (ResidentTransactionEntity) entity);
+				return true;
+			}
 		}
-		return Interceptor.super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
+		return false;
 	}
 
 	private <T extends ResidentTransactionEntity> void decryptDataOnLoad(Object id, Object[] state,
@@ -106,20 +106,79 @@ public class ResidentEntityInterceptor implements Interceptor, Serializable {
 		int indexOfData = propertyNamesList.indexOf(INDIVIDUAL_ID);
 		if (Objects.nonNull(state[indexOfData])) {
 			String individualId = (String) state[indexOfData];
-			String decodedIndividualId = tryDecryption(individualId, INDIVIDUAL_ID);
-			uinEntity.setIndividualId(decodedIndividualId);
-			state[indexOfData] = decodedIndividualId;
+			try {
+				String decodedIndividualId = tryDecryption(individualId, INDIVIDUAL_ID);
+				uinEntity.setIndividualId(decodedIndividualId);
+				state[indexOfData] = decodedIndividualId;
+			} catch (ResidentServiceException e) {
+				logger.error(ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorCode(),
+						ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorMessage(), e);
+				throw new ResidentServiceException(ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorCode(),
+						ResidentErrorCode.ENCRYPT_DECRYPT_ERROR.getErrorMessage(), e);
+			}
 		}
 	}
 
 	private String tryDecryption(String data, String attributeName) {
-		try {
-			String decryptedData = objectStoreHelper.encryptDecryptData(data, false, appId, refId);
-			String decodedIndividualId = new String(Base64.decodeBase64(decryptedData));
-			return decodedIndividualId;
-		} catch (ResidentServiceException e) {
-			logger.debug(String.format("Unable to decrpt data in interceptor: %s", attributeName));
-			return data;
-		}
+		String decryptedData = objectStoreHelper.encryptDecryptData(data, false, appId, refId);
+		String decodedIndividualId = new String(Base64.decodeBase64(decryptedData));
+		return decodedIndividualId;
+	}
+
+	public void afterTransactionBegin(Transaction tx) {
+		// Do nothing
+	}
+
+	public void afterTransactionCompletion(Transaction tx) {
+		// Do nothing
+	}
+
+	public void beforeTransactionCompletion(Transaction tx) {
+		// Do nothing
+	}
+
+	public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
+		// Do nothing
+	}
+
+	public int[] findDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
+			String[] propertyNames, Type[] types) {
+		return null;
+	}
+
+	public Object getEntity(String entityName, Serializable id) {
+		return null;
+	}
+
+	public String getEntityName(Object object) {
+		return null;
+	}
+
+	public Boolean isTransient(Object entity) {
+		return null;
+	}
+
+	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+		// Do nothing
+	}
+
+	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+		// Do nothing
+	}
+
+	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+		// Do nothing
+	}
+
+	public String onPrepareStatement(String sql) {
+		return sql;
+	}
+
+	public void postFlush(Iterator entities) {
+		// Do nothing
+	}
+
+	public void preFlush(Iterator entities) {
+		// Do nothing
 	}
 }
