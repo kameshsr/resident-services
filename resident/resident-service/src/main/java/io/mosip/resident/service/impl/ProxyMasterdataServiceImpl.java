@@ -389,44 +389,93 @@ public class ProxyMasterdataServiceImpl implements ProxyMasterdataService {
 		return responseWrapper;
 	}
 
-	@Override
-	public ResponseWrapper<?> getAllTemplateBylangCodeAndTemplateTypeCode(String langCode, String templateTypeCode)
-			throws ResidentServiceCheckedException {
-		logger.debug("ProxyMasterdataServiceImpl::getAllTemplateBylangCodeAndTemplateTypeCode()::entry");
-		ResponseWrapper<TemplateResponseDto> response = new ResponseWrapper<>();
-		Map<String, String> pathsegments = new HashMap<String, String>();
-		pathsegments.put("langcode", langCode);
-		pathsegments.put("templatetypecode", templateTypeCode);
+    @Override
+    public ResponseWrapper<?> getAllTemplateBylangCodeAndTemplateTypeCode(String langCode, String templateTypeCode)
+            throws ResidentServiceCheckedException {
 
-		try {
-			response = residentServiceRestClient.getApi(ApiName.TEMPLATES_BY_LANGCODE_AND_TEMPLATETYPECODE_URL,
-					pathsegments, ResponseWrapper.class);
-			if (response.getErrors() != null && !response.getErrors().isEmpty()) {
-				logger.error(response.getErrors().get(0).toString());
-				throw new ResidentServiceCheckedException(ResidentErrorCode.TEMPLATE_EXCEPTION);
-			}
-			TemplateResponseDto templateResponse = JsonUtil
-					.readValue(JsonUtil.writeValueAsString(response.getResponse()), TemplateResponseDto.class);
-			String template = templateResponse.getTemplates().get(0).getFileText();
-			ResponseWrapper<Map> responseWrapper = new ResponseWrapper<>();
-			Map<String, String> responseMap = new HashMap<>();
-			responseMap.put(ResidentConstants.FILE_TEXT, template);
-			responseWrapper.setResponse(responseMap);
-			logger.debug("ProxyMasterdataServiceImpl::getAllTemplateBylangCodeAndTemplateTypeCode()::exit");
-			return responseWrapper;
+        System.out.println("=== ENTER getAllTemplateBylangCodeAndTemplateTypeCode ===");
+        System.out.println("Input langCode           : " + langCode);
+        System.out.println("Input templateTypeCode   : " + templateTypeCode);
 
-		} catch (ApisResourceAccessException e) {
-			logger.error("Error occured in accessing templates %s", e.getMessage());
-			throw new ResidentServiceCheckedException(ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
-					ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorMessage(), e);
-		} catch (IOException e) {
-			logger.error("Error occured in accessing templates %s", e.getMessage());
-			throw new ResidentServiceCheckedException(ResidentErrorCode.IO_EXCEPTION.getErrorCode(),
-					ResidentErrorCode.IO_EXCEPTION.getErrorMessage(), e);
-		}
-	}
+        logger.debug("ProxyMasterdataServiceImpl::getAllTemplateBylangCodeAndTemplateTypeCode()::entry");
 
-	@Override
+        ResponseWrapper<TemplateResponseDto> response = new ResponseWrapper<>();
+        System.out.println("Initial response object  : " + response);
+
+        Map<String, String> pathsegments = new HashMap<>();
+        pathsegments.put("langcode", langCode);
+        pathsegments.put("templatetypecode", templateTypeCode);
+
+        System.out.println("Path Segments Map        : " + pathsegments);
+
+        try {
+            System.out.println("Calling residentServiceRestClient.getApi()");
+            response = residentServiceRestClient.getApi(
+                    ApiName.TEMPLATES_BY_LANGCODE_AND_TEMPLATETYPECODE_URL,
+                    pathsegments,
+                    ResponseWrapper.class
+            );
+
+            System.out.println("API Response received    : " + response);
+            System.out.println("API Errors               : " + response.getErrors());
+            System.out.println("API Response Body        : " + response.getResponse());
+
+            if (response.getErrors() != null && !response.getErrors().isEmpty()) {
+                System.out.println("Error found in response  : " + response.getErrors().get(0));
+                logger.error(response.getErrors().get(0).toString());
+                throw new ResidentServiceCheckedException(ResidentErrorCode.TEMPLATE_EXCEPTION);
+            }
+
+            System.out.println("Converting response to TemplateResponseDto");
+            TemplateResponseDto templateResponse = JsonUtil.readValue(
+                    JsonUtil.writeValueAsString(response.getResponse()),
+                    TemplateResponseDto.class
+            );
+
+            System.out.println("TemplateResponseDto      : " + templateResponse);
+            System.out.println("Templates list           : " + templateResponse.getTemplates());
+
+            String template = templateResponse.getTemplates().get(0).getFileText();
+            System.out.println("Extracted template text  : " + template);
+
+            ResponseWrapper<Map> responseWrapper = new ResponseWrapper<>();
+            Map<String, String> responseMap = new HashMap<>();
+
+            responseMap.put(ResidentConstants.FILE_TEXT, template);
+            System.out.println("Response Map             : " + responseMap);
+
+            responseWrapper.setResponse(responseMap);
+            System.out.println("Final ResponseWrapper    : " + responseWrapper);
+
+            logger.debug("ProxyMasterdataServiceImpl::getAllTemplateBylangCodeAndTemplateTypeCode()::exit");
+            System.out.println("=== EXIT getAllTemplateBylangCodeAndTemplateTypeCode ===");
+
+            return responseWrapper;
+
+        } catch (ApisResourceAccessException e) {
+            System.out.println("ApisResourceAccessException occurred");
+            System.out.println("Exception message        : " + e.getMessage());
+            logger.error("Error occured in accessing templates %s", e.getMessage());
+            throw new ResidentServiceCheckedException(
+                    ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
+                    ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorMessage(),
+                    e
+            );
+
+        } catch (IOException e) {
+            System.out.println("IOException occurred");
+            System.out.println("Exception message        : " + e.getMessage());
+            logger.error("Error occured in accessing templates %s", e.getMessage());
+            throw new ResidentServiceCheckedException(
+                    ResidentErrorCode.IO_EXCEPTION.getErrorCode(),
+                    ResidentErrorCode.IO_EXCEPTION.getErrorMessage(),
+                    e
+            );
+        }
+    }
+
+
+    @Override
 	@Cacheable(value = "templateCache", key = "#languageCode + '_' + #templateTypeCode")
 	public String getTemplateValueFromTemplateTypeCodeAndLangCode(String languageCode, String templateTypeCode) {
 		try {
